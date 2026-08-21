@@ -1,0 +1,6 @@
+interface:
+  display_name: "阴山优麦日报"
+  short_description: "计算并填写阴山优麦飞书数据日报"
+  default_prompt: "Use $feishu-yinshan-daily-report to fill yesterday's Yinshan Youmai Feishu daily report from local Excel files."
+policy:
+  allow_implicit_invocation: true

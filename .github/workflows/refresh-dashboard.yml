@@ -1,0 +1,59 @@
+name: Refresh Dashboard Data
+
+on:
+  schedule:
+    # 北京时间每天 09:30 = UTC 01:30
+    - cron: '30 1 * * *'
+  workflow_dispatch: # 支持手动触发
+
+permissions:
+  contents: write
+
+concurrency:
+  group: dashboard-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install lark-cli
+        run: |
+          npm install -g @larksuite/cli@1.0.88
+          lark-cli --version
+
+      - name: Configure lark-cli bot identity
+        env:
+          LARK_APP_ID: ${{ secrets.LARK_APP_ID }}
+          LARK_APP_SECRET: ${{ secrets.LARK_APP_SECRET }}
+        run: |
+          unset OPENCLAW_HOME HERMES_HOME 2>/dev/null || true
+          echo "$LARK_APP_SECRET" | lark-cli config init --app-id "$LARK_APP_ID" --app-secret-stdin --brand feishu
+
+      - name: Refresh dashboard data
+        env:
+          DASHBOARD_SHEET_TOKEN: ${{ secrets.DASHBOARD_SHEET_TOKEN }}
+          HANDOFF_SHEET_TOKEN: ${{ secrets.HANDOFF_SHEET_TOKEN }}
+        run: |
+          export LARK_CLI="$(which lark-cli)"
+          python3 dashboard_data_updater.py
+
+      - name: Commit and push updated data
+        run: |
+          git config user.name "yinshan-dashboard-bot"
+          git config user.email "yinshan-dashboard-bot@users.noreply.github.com"
+          git add dashboard_data.json
+          if git diff --cached --quiet; then
+            echo "No data changes, skipping commit."
+          else
+            git commit -m "chore: refresh dashboard data [$(date -u +'%Y-%m-%d %H:%M UTC')]"
+            git push
+          fi

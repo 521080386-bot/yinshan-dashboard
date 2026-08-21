@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>阴山优麦 · 数据驾驶舱</title>
+<script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+<script src="https://unpkg.com/echarts"></script>
+<script src="https://unpkg.com/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;background:linear-gradient(135deg,#eef2fb 0%,#e4eaf7 50%,#f0ecfa 100%);min-height:100vh;color:#1e293b}
+#app{max-width:1480px;margin:0 auto;padding:20px 24px 80px}
+.panel{background:#fff;border-radius:16px;padding:20px 22px;box-shadow:0 2px 12px rgba(0,0,0,0.04)}
+.panel-head{font-size:16px;font-weight:600;color:#1e40af;display:flex;align-items:center;gap:6px;margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid #eef2ff}
+.mc{background:#f8faff;border-radius:12px;padding:14px 12px;text-align:center;border:1px solid #eef2f9}
+.mcl{font-size:12px;color:#64748b;font-weight:500}
+.mcv{font-size:20px;font-weight:700;color:#1e293b;margin-top:4px}
+.kc{background:linear-gradient(135deg,#fff,#f8faff);border-radius:16px;padding:20px 22px;box-shadow:0 2px 12px rgba(0,0,0,0.06);display:flex;align-items:center;gap:16px;border-top:3px solid var({{ fmt(394.15) }}kc-color,#3b82f6)}
+.kv{font-size:30px;font-weight:700;letter-spacing:-.01em;line-height:1.2;color:var(--kc-color,#3b82f6)}
+.kl{font-size:14px;color:#64748b;font-weight:500;margin-bottom:2px}
+.ks{font-size:13px;color:#94a3b8;margin-top:2px}
+.si{display:flex;align-items:center;gap:12px;padding:11px 14px;background:#f8faff;border-radius:10px;border:1px solid #eef2f9;margin-bottom:8px}
+.siv{font-size:20px;font-weight:700}
+@keyframes spin{to{transform:rotate(360deg)}}
+.fade-enter-active,.fade-leave-active{transition:opacity .25s,transform .25s}
+.fade-enter-from,.fade-leave-to{opacity:0;transform:translateY(8px)}
+</style>
+</head>
+<body>
+<div id="app">
+  <!-- Loading -->
+  <div v-if="loading" style="position:fixed;inset:0;background:rgba(238,242,251,0.95);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999">
+    <div style="width:40px;height:40px;border:3px solid #e2e8f0;border-top-color:#3b82f6;border-radius:50%;animation:spin .8s linear infinite;margin-bottom:16px"></div>
+    <span style="font-size:15px;color:#64748b">加载数据中…</span>
+  </div>
+
+  <!-- HEADER -->
+  <header style="background:linear-gradient(135deg,#0a1e4a,#1a3a7a,#1e4d8f);border-radius:18px;padding:24px 34px 14px;color:#fff;position:relative;overflow:hidden;box-shadow:0 4px 24px rgba(10,30,74,0.25)">
+    <div style="position:absolute;top:-120px;right:-80px;width:340px;height:340px;border-radius:50%;background:radial-gradient(circle,rgba(59,130,246,0.10),transparent 70%)"></div>
+    <div style="display:flex;gap:8px;margin-bottom:6px">
+      <span style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);color:#b0caff;border-radius:8px;padding:2px 8px;font-size:13px">📅 2026年7月</span>
+      <span style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);color:#b0caff;border-radius:8px;padding:2px 8px;font-size:13px">👤 项目经理：姜续</span>
+    </div>
+    <h1 style="font-size:26px;font-weight:700;background:linear-gradient(90deg,#fff 55%,#84a8ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-top:6px">聚光直播 · 阴山优麦 项目数据复盘报告</h1>
+    <p style="font-size:14px;color:#7a9eff;margin-top:2px">经营数据驾驶舱 · 实时可视化看板</p>
+    <div style="height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.08),transparent);margin:12px 0 8px"></div>
+    <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:#6a8ed6">
+      <span :style="{width:'8px',height:'8px',borderRadius:'50%',display:'inline-block',background:'#10b981',boxShadow:'0 0 8px rgba(16,185,129,0.5)'}"></span>
+      <span>数据已更新 · 2026-07-21</span>
+      <span style="flex:1"></span>
+      <span>自动刷新</span>
+      <span style="font-variant-numeric:tabular-nums;color:#94b8ff;font-size:14px">{{ countdown }}</span>
+    </div>
+  </header>
+
+  <!-- KPI ROW 1 -->
+  <div style="margin-top:18px">
+    <div style="font-size:15px;font-weight:600;color:#1e293b;margin-bottom:10px">📊 月度累计指标</div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:14px">
+      <div class="kc" style="--kc-color:#10b981">
+        <div><div class="kl">全店总成交（累计）</div><div class="kv">{{ fmt(cumulativeTx) }}</div><div class="ks">7月1日-{{ dayRange }}日累计GMV</div></div>
+      </div>
+      <div class="kc" style="--kc-color:#3b82f6">
+        <div><div class="kl">本月目标GMV</div><div class="kv">{{ monthTarget }}</div><div class="ks">月度GMV目标</div></div>
+      </div>
+      <div class="kc" :style="'--kc-color:'+(salesGap>0?'#f59e0b':'#10b981')">
+        <div><div class="kl">销售差额</div><div class="kv">{{ fmt(salesGap) }}</div><div class="ks">目标 - 累计GMV</div></div>
+      </div>
+      <div class="kc" style="--kc-color:#8b5cf6">
+        <div><div class="kl">本月ROI</div><div class="kv">{{ cumulativeRoi }}</div><div class="ks">累计GMV ÷ 累计消耗</div></div>
+      </div>
+    </div>
+    <div style="font-size:15px;font-weight:600;color:#1e293b;margin-bottom:10px">📈 本日实时指标</div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px">
+      <div class="kc" style="--kc-color:#3b82f6">
+        <div><div class="kl">当日总GMV</div><div class="kv">{{ fmt(dailyTx) }}</div><div class="ks">当日成交总额</div></div>
+      </div>
+      <div class="kc" style="--kc-color:#f59e0b">
+        <div><div class="kl">当日总消耗</div><div class="kv">{{ fmt(dailySpend) }}</div><div class="ks">当日广告花费</div></div>
+      </div>
+      <div class="kc" style="--kc-color:#06b6d4">
+        <div><div class="kl">当日ROI</div><div class="kv">{{ dailyRoi }}</div><div class="ks">当日成交 ÷ 消耗</div></div>
+      </div>
+      <div class="kc" style="--kc-color:#f43f5e">
+        <div><div class="kl">后续日均达成</div><div class="kv">{{ fmt(dailyTargetNeed) }}</div><div class="ks">剩余{{ remainingDays }}天需日均达成</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN GRID -->
+  <div style="display:grid;grid-template-columns:320px 1fr 380px;gap:16px;margin-top:16px">
+    <!-- Left: Daily Summary -->
+    <div class="panel">
+      <div class="panel-head">📊 店铺单日数据复盘汇总</div>
+      <div v-for="item in summaryItems" :key="item.label" class="si">
+        <div style="width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0" :style="{background:item.bg}">
+          <span :style="{fontSize:'18px'}">{{ item.icon }}</span>
+        </div>
+        <div style="flex:1;display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:14px;color:#475569;font-weight:500">{{ item.label }}</span>
+          <span class="siv" :style="{color:item.color}">{{ item.value }}</span>
+        </div>
+      </div>
+    </div>
+    <!-- Middle: GMV Trend -->
+    <div class="panel">
+      <div class="panel-head">📈 本月GMV趋势 <span style="font-size:12px;color:#94a3b8;font-weight:400;margin-left:auto">7月1日-31日</span></div>
+      <div ref="gmvChartRef" style="width:100%;height:340px"></div>
+    </div>
+    <!-- Right: Anchor Data -->
+    <div class="panel">
+      <div class="panel-head">👤 主播班次数据</div>
+      <div ref="anchorChartRef" style="width:100%;height:220px"></div>
+      <table style="width:100%;border-collapse:collapse;margin-top:8px;font-size:13px">
+        <thead><tr style="background:#f0f5ff;color:#1e40af;font-weight:600">
+          <th style="padding:8px 4px;text-align:center">#</th>
+          <th style="padding:8px 4px;text-align:center">主播</th>
+          <th style="padding:8px 4px;text-align:center">GMV</th>
+          <th style="padding:8px 4px;text-align:center">消耗</th>
+          <th style="padding:8px 4px;text-align:center">ROI</th>
+        </tr></thead>
+        <tbody>
+          <tr v-for="(a, i) in sortedAnchors" :key="a.name" :style="{background:i%2===0?'#fff':'#f8faff'}">
+            <td style="padding:12px 4px;text-align:center;color:#94a3b8">{{ i+1 }}</td>
+            <td style="padding:12px 4px;text-align:center;font-weight:600">{{ a.name }}</td>
+            <td style="padding:12px 4px;text-align:center">{{ fmt(a.gmv) }}</td>
+            <td style="padding:12px 4px;text-align:center">{{ fmt(a.spend) }}</td>
+            <td style="padding:12px 4px;text-align:center"><span :style="{color:a.roi>=2.5?'#10b981':'#f59e0b',fontWeight:600}">{{ a.roi?.toFixed(2) }}</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- BOTTOM -->
+  <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:16px">
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div class="panel">
+        <div class="panel-head">🎥 视频号数据</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
+          <div class="mc"><div class="mcl">直播GMV</div><div class="mcv">{{ fmt(videoData.gmv) }}</div></div>
+          <div class="mc"><div class="mcl">投放消耗</div><div class="mcv">{{ fmt(videoData.spend) }}</div></div>
+          <div class="mc"><div class="mcl">ROI</div><div class="mcv">{{ videoData.roi.toFixed(2) }}</div></div>
+          <div class="mc"><div class="mcl">本月总GMV</div><div class="mcv">{{ fmt(videoMonthly.gmv) }}</div></div>
+          <div class="mc"><div class="mcl">本月总消耗</div><div class="mcv">{{ fmt(videoMonthly.spend) }}</div></div>
+          <div class="mc"><div class="mcl">本月ROI</div><div class="mcv">{{ videoMonthly.roi.toFixed(2) }}</div></div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div class="panel">
+        <div class="panel-head">📮 邮政直播间数据</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
+          <div class="mc"><div class="mcl">直播GMV</div><div class="mcv">{{ fmt(postalData.gmv) }}</div></div>
+          <div class="mc"><div class="mcl">投放消耗</div><div class="mcv">{{ fmt(postalData.spend) }}</div></div>
+          <div class="mc"><div class="mcl">ROI</div><div class="mcv">{{ postalData.roi.toFixed(2) }}</div></div>
+          <div class="mc"><div class="mcl">本月总GMV</div><div class="mcv">{{ fmt(postalMonthly.gmv) }}</div></div>
+          <div class="mc"><div class="mcl">本月总消耗</div><div class="mcv">{{ fmt(postalMonthly.spend) }}</div></div>
+          <div class="mc"><div class="mcl">本月ROI</div><div class="mcv">{{ postalMonthly.roi.toFixed(2) }}</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="text-align:center;font-size:13px;color:#94a3b8;padding:16px 0;margin-top:20px;border-top:1px solid #eef2f9">阴山优麦 · 数据复盘报告 · 数据来源：飞书电子表格</div>
+
+  <button id="screenshotBtn" @click="captureScreenshot" :disabled="capturing" style="position:fixed;bottom:28px;right:28px;z-index:100;display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#1e40af,#3b82f6);color:#fff;border:none;border-radius:999px;padding:12px 24px;font-size:14px;font-weight:500;cursor:pointer;box-shadow:0 4px 20px rgba(59,130,246,0.35)">
+  📸 {{ capturing ? '保存中…' : '保存截图' }}
+  </button>
+
+  <!-- 截图弹窗 -->
+
+  <!-- Toast 提示 -->
+  <transition name="fade">
+    <div v-if="toastMsg" style="position:fixed;bottom:85px;right:28px;z-index:101;background:#1e293b;color:#fff;padding:10px 20px;border-radius:10px;font-size:14px;box-shadow:0 4px 16px rgba(0,0,0,0.15)">{{ toastMsg }}</div>
+  </transition>
+</div>
+
+<script>
+const { createApp, ref, computed, onMounted, onUnmounted, nextTick } = Vue
+
+const app = createApp({
+  setup() {
+    const loading = ref(true)
+    const countdown = ref('5:00')
+    const capturing = ref(false)
+    const copying = ref(false)
+    const showModal = ref(false)
+    const screenshotDataUrl = ref('')
+    const toastMsg = ref('')
+    const capturedCanvas = ref(null)
+    const gmvChartRef = ref(null)
+    const anchorChartRef = ref(null)
+
+        const knownDays = ref([])
+
+    const postalDays = ref([])
+
+    const cumulativeTx = computed(() => knownDays.value.reduce((s,d) => s+d.dv, 0))
+    const cumulativeSpend = computed(() => knownDays.value.reduce((s,d) => s+d.sp, 0))
+    const monthTarget = '300万'
+    const monthTargetNum = 3000000
+    const salesGap = computed(() => monthTargetNum - cumulativeTx.value)
+    const cumulativeRoi = computed(() => cumulativeSpend.value>0 ? (cumulativeTx.value/cumulativeSpend.value).toFixed(2) : 0)
+    const dayRange = computed(() => knownDays.value.length || '?')
+    const remainingDays = computed(() => 31 - (knownDays.value.length || 20))
+    const dailyTargetNeed = computed(() => Math.max(0, salesGap.value/remainingDays.value))
+    const dailyTx = ref(90642.56)
+    const dailySpend = ref(32175.42)
+    const dailyRoi = ref('2.82')
+
+    const videoData = ref({gmv:0, spend:0, roi:0})
+    const postalData = ref({gmv:0, spend:0, roi:0})
+    const videoMonthly = ref({gmv:0, spend:0, roi:0})
+    const postalMonthly = ref({gmv:0, spend:0, roi:0})
+    const latestPostal = computed(() => {
+      const p = postalData.value
+      return {liveGmv:p.gmv, adSpend:p.spend, roi:p.roi, cumGmv:0, cumSpend:0, cumRoi:0}
+    })
+
+    const sortedAnchors = ref([])
+
+    const latestData = ref(null)
+    const summaryItems = computed(() => {
+      const ld = latestData.value || {}
+      return [
+        {label:'直播GMV', value:fmt(ld.d), icon:'🎬', color:'#3b82f6', bg:'rgba(59,130,246,0.10)'},
+        {label:'短视频GMV', value:fmt(ld.e), icon:'🎞️', color:'#f43f5e', bg:'rgba(244,63,94,0.10)'},
+        {label:'商品卡', value:fmt(ld.f), icon:'📦', color:'#06b6d4', bg:'rgba(6,182,212,0.10)'},
+        {label:'其他', value:fmt(ld.g), icon:'📋', color:'#8b5cf6', bg:'rgba(139,92,246,0.10)'},
+        {label:'图文', value:fmt(ld.h), icon:'🖼️', color:'#ec4899', bg:'rgba(236,72,153,0.10)'},
+      ]
+    })
+
+    function fmt(v) {
+      if (v==null || v===undefined) return '--'
+      if (Math.abs(v)>=10000) return '¥'+(v/10000).toFixed(2)+'万'
+      return '¥'+Number(v).toLocaleString('zh-CN',{minimumFractionDigits:0,maximumFractionDigits:2})
+    }
+
+    function initCharts() {
+      if (gmvChartRef.value) {
+        const c = echarts.init(gmvChartRef.value)
+        c.setOption({
+          tooltip:{trigger:'axis',axisPointer:{type:'cross'}},
+          legend:{data:['抖音GMV','ROI'],top:0,textStyle:{color:'#475569',fontSize:13}},
+          grid:{top:34,left:48,right:40,bottom:20},
+          xAxis:{type:'category',data:knownDays.value.map(d=>d.day+'日'),axisLine:{lineStyle:{color:'#e2e8f0'}},axisLabel:{color:'#64748b',fontSize:10,interval:2},axisTick:{show:false}},
+          yAxis:[{type:'value',name:'抖音GMV',nameTextStyle:{color:'#3b82f6',fontSize:11,fontWeight:600},splitLine:{lineStyle:{color:'#f1f5f9',type:'dashed'}},axisLabel:{color:'#94a3b8',fontSize:10,formatter:v=>(v/10000).toFixed(2)+'万'}},{type:'value',name:'ROI',nameTextStyle:{color:'#ef4444',fontSize:11,fontWeight:600},splitLine:{show:false},axisLabel:{color:'#94a3b8',fontSize:10},min:2,max:4}],
+          series:[{name:'抖音GMV',type:'bar',data:knownDays.value.map(d=>d.dv),yAxisIndex:0,itemStyle:{color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'#3b82f6'},{offset:1,color:'#60a5fa'}]),borderRadius:[3,3,0,0]},barWidth:12},{name:'ROI',type:'line',data:knownDays.value.map(d=>+(d.dv/d.sp).toFixed(2)),yAxisIndex:1,smooth:true,lineStyle:{color:'#ef4444',width:2},itemStyle:{color:'#ef4444'},symbol:'circle',symbolSize:4,label:{show:false}}]
+        })
+      }
+      if (anchorChartRef.value) {
+        const c = echarts.init(anchorChartRef.value)
+        c.setOption({
+          tooltip:{trigger:'axis',axisPointer:{type:'shadow'}},
+          legend:{data:['GMV','消耗','ROI'],top:0,textStyle:{color:'#475569',fontSize:11}},
+          grid:{top:34,left:8,right:8,bottom:24,containLabel:true},
+          xAxis:{type:'category',data:sortedAnchors.value.map(a=>a.name),axisLine:{lineStyle:{color:'#e2e8f0'}},axisLabel:{color:'#475569',fontSize:13,fontWeight:600},axisTick:{show:false}},
+          yAxis:[{type:'value',name:'GMV / 消耗',nameTextStyle:{color:'#94a3b8',fontSize:11},splitLine:{lineStyle:{color:'#f1f5f9',type:'dashed'}},axisLabel:{color:'#94a3b8',fontSize:11,formatter:v=>(v/10000).toFixed(2)+'万'}},{type:'value',name:'ROI',nameTextStyle:{color:'#94a3b8',fontSize:11},min:2.0,splitLine:{show:false},axisLabel:{color:'#94a3b8',fontSize:11}}],
+          series:[{name:'GMV',type:'bar',data:sortedAnchors.value.map(a=>a.gmv),yAxisIndex:0,itemStyle:{color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'#3b82f6'},{offset:1,color:'#1d4ed8'}]),borderRadius:[4,4,0,0]},barWidth:10,barGap:'20%',barCategoryGap:'30%'},{name:'消耗',type:'bar',data:sortedAnchors.value.map(a=>a.spend),yAxisIndex:0,itemStyle:{color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'#f59e0b'},{offset:1,color:'#d97706'}]),borderRadius:[4,4,0,0]},barWidth:10,barGap:'20%',barCategoryGap:'30%'},{name:'ROI',type:'line',data:sortedAnchors.value.map(a=>+(a.roi||0).toFixed(2)),yAxisIndex:1,smooth:true,lineStyle:{color:'#ef4444',width:2.5},itemStyle:{color:'#ef4444'},symbol:'circle',symbolSize:7,label:{show:true,formatter:p=>p.value.toFixed(2),color:'#ef4444',fontSize:11,fontWeight:700}}]
+        })
+      }
+    }
+
+    async function captureScreenshot() {
+      capturing.value = true
+      var btn = document.querySelector('#screenshotBtn')
+      if (btn) btn.style.display = 'none'
+      try {
+        await new Promise(function(r){setTimeout(r,100)})
+        const canvas = await html2canvas(document.querySelector('#app'), {scale:2,backgroundColor:'#eef2fb',useCORS:true,logging:false,onclone:function(doc){var h=doc.querySelector('h1');if(h){h.style.background='none';h.style.webkitBackgroundClip='unset';h.style.backgroundClip='unset';h.style.webkitTextFillColor='#ffffff';h.style.color='#ffffff'}}})
+        capturedCanvas.value = canvas
+        screenshotDataUrl.value = canvas.toDataURL('image/png')
+        saveAs(screenshotDataUrl.value)
+      } catch(e) {
+        toastMsg.value = '❌ 截图失败'
+        setTimeout(function(){toastMsg.value=''},2500)
+      }
+      finally {
+        if (btn) btn.style.display = 'flex'
+        capturing.value = false
+      }
+    }
+
+    function copyScreenshot() {
+      const canvas = capturedCanvas.value
+      if (!canvas) return
+      copying.value = true
+      canvas.toBlob(function(blob) {
+        if (!blob) {
+          toastMsg.value = '❌ 复制失败，请右键保存到桌面'
+          copying.value = false
+          setTimeout(function(){toastMsg.value=''},2500)
+          return }
+        ;(async function(){
+          try {
+            await navigator.clipboard.write([new ClipboardItem({'image/png': blob})])
+            toastMsg.value = '✅ 已复制截图'
+          } catch(e) {
+            saveAs(screenshotDataUrl.value)
+          }
+          setTimeout(function(){toastMsg.value=''},2500)
+          copying.value = false
+        })()
+      }, 'image/png')
+    }
+
+    function downloadScreenshot() {
+      if (!screenshotDataUrl.value) return
+      var btn = (typeof event !== 'undefined' && event && event.target) ? event.target : null
+      if (btn) { btn.disabled = true; btn.textContent = '保存中…' }
+      saveAs(screenshotDataUrl.value, 'ym_dashboard_' + new Date().toISOString().slice(0,10) + '.png')
+      if (btn) { btn.disabled = false; btn.textContent = '保存到桌面' }
+    }
+    function saveAs(dataUrl, defaultName) {
+      fetch('http://127.0.0.1:5176/save-screenshot', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({image: dataUrl})
+      }).then(function(r){return r.json()}).then(function(d){
+        if (d.ok) {
+          toastMsg.value = '✅ 已保存到桌面: ' + d.path
+        } else {
+          toastMsg.value = '❌ 保存失败'
+        }
+      }).catch(function(){
+        toastMsg.value = '❌ 保存失败'
+      }).finally(function(){
+        setTimeout(function(){toastMsg.value=''},3000)
+      })
+    }
+
+    let timer = null
+    onMounted(async () => {
+      loading.value = true
+      try {
+        const res = await fetch('dashboard_data.json?t='+Date.now())
+        if (res.ok) {
+          const j = await res.json()
+          if (j.knownDays && j.knownDays.length > 0) knownDays.value = j.knownDays
+          if (j.latest) {
+            latestData.value = j.latest
+            dailyTx.value = j.latest.b || 90642.56
+            dailySpend.value = j.latest.c || 32175.42
+            dailyRoi.value = j.latest.c > 0 ? (j.latest.b / j.latest.c).toFixed(2) : '--'
+          }
+          if (j.postal) postalData.value = j.postal
+          if (j.video) videoData.value = j.video
+          if (j.postalHistory) postalDays.value = j.postalHistory
+          if (j.videoMonthly) videoMonthly.value = j.videoMonthly
+          if (j.postalMonthly) postalMonthly.value = j.postalMonthly
+          if (j.anchors && j.anchors.length > 0) sortedAnchors.value = j.anchors
+          if (j.fetchedAt) {
+            const el = document.querySelector('.header-bar span:nth-child(2)')
+            if (el) el.textContent = '数据已更新 · ' + j.fetchedAt
+          }
+        }
+      } catch(e) { console.warn('fetch failed', e) }
+      finally {
+        loading.value = false
+        nextTick(() => { initCharts() })
+      }
+      let r = 300
+      timer = setInterval(() => { r--; if(r<0) r=300; countdown.value = String(Math.floor(r/60)).padStart(2,'0')+':'+String(r%60).padStart(2,'0') }, 1000)
+    })
+    onUnmounted(() => { clearInterval(timer) })
+
+    return { loading, cumulativeTx, cumulativeSpend, monthTarget, salesGap, cumulativeRoi, dayRange, remainingDays, dailyTargetNeed, dailyTx, dailySpend, dailyRoi, latestPostal, sortedAnchors, summaryItems, fmt, countdown, gmvChartRef, anchorChartRef, capturing, copying, showModal, screenshotDataUrl, toastMsg, captureScreenshot, copyScreenshot, downloadScreenshot, videoData, postalData, videoMonthly, postalMonthly }
+  }
+})
+
+app.mount('#app')
+</script>
+</body>
+</html>

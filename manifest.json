@@ -1,0 +1,9 @@
+{
+  "name": "阴山优麦 · 数据驾驶舱",
+  "short_name": "数据驾驶舱",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#eef2fb",
+  "theme_color": "#0a1e4a",
+  "description": "聚光直播 · 阴山优麦项目数据复盘报告"
+}
