@@ -90,9 +90,9 @@ button{font:inherit}
 .hist-card.selected{border-color:var(--cyan);box-shadow:inset 0 0 0 2px rgba(18,201,232,.28),0 0 18px rgba(0,170,255,.28);background:linear-gradient(180deg,#0b2a4e,#07203c)}
 .hist-card.selected::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--cyan);box-shadow:0 0 10px var(--cyan)}
 .hist-card .hc-label{font-size:13px;color:#c2d6ec;font-weight:650;display:flex;align-items:center;gap:7px}
-.hist-card .hc-value{font-size:30px;font-weight:800;margin-top:7px;letter-spacing:-.02em}
+.hist-card .hc-value{font-size:30px;font-weight:800;margin-top:7px;letter-spacing:-.02em;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
 .hist-card .hc-sub{font-size:12px;color:#8fb0d4;font-weight:550;margin-top:6px}
-.hist-card .hc-pct{display:inline-block;margin-left:8px;font-size:13px;font-weight:750;padding:2px 8px;border-radius:10px;background:rgba(255,152,0,.14);color:var(--orange)}
+.hist-card .hc-pct{display:inline-block;font-size:22px;font-weight:800;padding:1px 10px;border-radius:10px;background:rgba(255,152,0,.16);color:var(--orange);letter-spacing:0;align-self:center}
 .hist-card .hc-chip{font-size:11px;color:#9fc3ea;background:rgba(31,94,158,.4);padding:2px 8px;border-radius:9px;margin-left:auto}
 .trend-wrap{margin-top:10px;border:1px solid rgba(19,112,194,.72);background:linear-gradient(180deg,#071a34,#05152b);box-shadow:inset 0 0 0 2px rgba(3,49,93,.7)}
 .trend-wrap .panel-head small{color:#ffb84d;font-weight:650}
@@ -195,29 +195,29 @@ button{font:inherit}
         <div class="hc-sub">GMV ÷ 消耗</div>
       </div>
       <div class="hist-card" :class="{selected:selectedCard==='live'}" @click="selectCard('live')">
-        <div class="hc-label"><i class="ri-live-line" style="color:#4b91ff"></i>直播GMV <span class="hc-pct">{{ histTotal.pct.live }}</span></div>
-        <div class="hc-value" style="color:#4b91ff">{{ fmt(histTotal.live) }}</div>
-        <div class="hc-sub">占区间总成交 {{ histTotal.pct.live }}</div>
+        <div class="hc-label"><i class="ri-live-line" style="color:#4b91ff"></i>直播GMV</div>
+        <div class="hc-value" style="color:#4b91ff">{{ fmt(histTotal.live) }} <span class="hc-pct">{{ histTotal.pct.live }}</span></div>
+        <div class="hc-sub">直播渠道成交</div>
       </div>
       <div class="hist-card" :class="{selected:selectedCard==='short_video'}" @click="selectCard('short_video')">
-        <div class="hc-label"><i class="ri-movie-line" style="color:#ff4d4f"></i>短视频GMV <span class="hc-pct">{{ histTotal.pct.short_video }}</span></div>
-        <div class="hc-value" style="color:#ff4d4f">{{ fmt(histTotal.short_video) }}</div>
-        <div class="hc-sub">占区间总成交 {{ histTotal.pct.short_video }}</div>
+        <div class="hc-label"><i class="ri-movie-line" style="color:#ff4d4f"></i>短视频GMV</div>
+        <div class="hc-value" style="color:#ff4d4f">{{ fmt(histTotal.short_video) }} <span class="hc-pct">{{ histTotal.pct.short_video }}</span></div>
+        <div class="hc-sub">短视频渠道成交</div>
       </div>
       <div class="hist-card" :class="{selected:selectedCard==='card'}" @click="selectCard('card')">
-        <div class="hc-label"><i class="ri-box-3-line" style="color:#12c9e8"></i>商品卡 <span class="hc-pct">{{ histTotal.pct.card }}</span></div>
-        <div class="hc-value" style="color:#12c9e8">{{ fmt(histTotal.card) }}</div>
-        <div class="hc-sub">占区间总成交 {{ histTotal.pct.card }}</div>
+        <div class="hc-label"><i class="ri-box-3-line" style="color:#12c9e8"></i>商品卡</div>
+        <div class="hc-value" style="color:#12c9e8">{{ fmt(histTotal.card) }} <span class="hc-pct">{{ histTotal.pct.card }}</span></div>
+        <div class="hc-sub">商品卡渠道成交</div>
       </div>
       <div class="hist-card" :class="{selected:selectedCard==='graphic'}" @click="selectCard('graphic')">
-        <div class="hc-label"><i class="ri-image-line" style="color:#ff4d4f"></i>图文 <span class="hc-pct">{{ histTotal.pct.graphic }}</span></div>
-        <div class="hc-value" style="color:#ff4d4f">{{ fmt(histTotal.graphic) }}</div>
-        <div class="hc-sub">占区间总成交 {{ histTotal.pct.graphic }}</div>
+        <div class="hc-label"><i class="ri-image-line" style="color:#ff4d4f"></i>图文</div>
+        <div class="hc-value" style="color:#ff4d4f">{{ fmt(histTotal.graphic) }} <span class="hc-pct">{{ histTotal.pct.graphic }}</span></div>
+        <div class="hc-sub">图文渠道成交</div>
       </div>
       <div class="hist-card" :class="{selected:selectedCard==='other'}" @click="selectCard('other')">
-        <div class="hc-label"><i class="ri-file-list-3-line" style="color:#b78cff"></i>其他 <span class="hc-pct">{{ histTotal.pct.other }}</span></div>
-        <div class="hc-value" style="color:#b78cff">{{ fmt(histTotal.other) }}</div>
-        <div class="hc-sub">占区间总成交 {{ histTotal.pct.other }}</div>
+        <div class="hc-label"><i class="ri-file-list-3-line" style="color:#b78cff"></i>其他</div>
+        <div class="hc-value" style="color:#b78cff">{{ fmt(histTotal.other) }} <span class="hc-pct">{{ histTotal.pct.other }}</span></div>
+        <div class="hc-sub">其他渠道成交</div>
       </div>
     </div>
 
@@ -276,7 +276,7 @@ createApp({setup(){
     gmvChart.setOption({...chartBase(),tooltip:{trigger:'axis',backgroundColor:'#06172e',borderColor:'#237ece',textStyle:{color:'#fff'}},legend:{data:['抖音GMV','ROI'],top:12,textStyle:{color:'#eaf3ff',fontSize:14,fontWeight:600},itemGap:24},grid:{top:54,left:70,right:60,bottom:48},xAxis:{type:'category',data:knownDays.value.map(d=>d.day+'日'),axisLine:{lineStyle:{color:'#6f8ead'}},axisTick:{show:false},axisLabel:{color:'#d8e5f5',fontSize:13,interval:2,margin:13}},yAxis:[{type:'value',name:'抖音GMV',nameTextStyle:{color:'#bcd3ed',fontSize:13,padding:[0,0,8,0]},splitLine:{lineStyle:{color:'rgba(107,145,185,.22)',type:'dashed'}},axisLine:{show:true,lineStyle:{color:'#476887'}},axisLabel:{color:'#d8e5f5',fontSize:12,formatter:v=>(v/10000).toFixed(2)+'万'}},{type:'value',name:'ROI',min:2,max:4,nameTextStyle:{color:'#ff6262',fontSize:13,padding:[0,0,8,0]},splitLine:{show:false},axisLine:{show:true,lineStyle:{color:'#476887'}},axisLabel:{color:'#d8e5f5',fontSize:12}}],series:[{name:'抖音GMV',type:'bar',data:knownDays.value.map(d=>d.dv),barWidth:14,itemStyle:{color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'#5ba0ff'},{offset:1,color:'#276ed1'}])}},{name:'ROI',type:'line',yAxisIndex:1,data:knownDays.value.map(d=>d.sp>0?+(d.dv/d.sp).toFixed(2):0),smooth:true,symbol:'circle',symbolSize:7,lineStyle:{color:'#ff453a',width:3},itemStyle:{color:'#ff453a',borderColor:'#fff',borderWidth:1}}]})
     anchorChart.setOption({...chartBase(),tooltip:{trigger:'axis',backgroundColor:'#06172e',borderColor:'#237ece',textStyle:{color:'#fff'}},legend:{data:['GMV','消耗','ROI'],top:4,textStyle:{color:'#eaf3ff',fontSize:14,fontWeight:600},itemGap:20},grid:{top:48,left:62,right:55,bottom:40},xAxis:{type:'category',data:sortedAnchors.value.map(a=>a.name),axisLine:{lineStyle:{color:'#6f8ead'}},axisTick:{show:false},axisLabel:{color:'#f2f7ff',fontSize:14,fontWeight:600}},yAxis:[{type:'value',name:'GMV / 消耗',nameTextStyle:{color:'#bcd3ed',fontSize:12},splitLine:{lineStyle:{color:'rgba(107,145,185,.2)',type:'dashed'}},axisLabel:{color:'#d8e5f5',fontSize:12,formatter:v=>(v/10000).toFixed(2)+'万'}},{type:'value',name:'ROI',min:2,nameTextStyle:{color:'#ff6262',fontSize:12},splitLine:{show:false},axisLabel:{color:'#d8e5f5',fontSize:12}}],series:[{name:'GMV',type:'bar',data:sortedAnchors.value.map(a=>a.gmv),barWidth:22,itemStyle:{color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'#5ba0ff'},{offset:1,color:'#276ed1'}])}},{name:'消耗',type:'bar',data:sortedAnchors.value.map(a=>a.spend),barWidth:22,itemStyle:{color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'#ffb02e'},{offset:1,color:'#df7500'}])}},{name:'ROI',type:'line',yAxisIndex:1,data:sortedAnchors.value.map(a=>Number(a.roi||0)),smooth:true,symbol:'circle',symbolSize:9,lineStyle:{color:'#ff453a',width:3},itemStyle:{color:'#ff453a'},label:{show:true,position:'top',formatter:p=>Number(p.value).toFixed(2),color:'#fff',fontSize:12,fontWeight:700}}]})
   }
-  async function loadData(){try{const res=await fetch('dashboard_data.json?t='+Date.now());if(!res.ok)throw new Error('HTTP '+res.status);const j=await res.json();knownDays.value=j.knownDays||[];latestData.value=j.latest||null;if(j.latest){dailyTx.value=j.latest.b||0;dailySpend.value=j.latest.c||0;dailyRoi.value=j.latest.c>0?(j.latest.b/j.latest.c).toFixed(2):'--'}sortedAnchors.value=j.anchors||[];videoData.value=j.video||videoData.value;postalData.value=j.postal||postalData.value;videoMonthly.value=j.videoMonthly||videoMonthly.value;postalMonthly.value=j.postalMonthly||postalMonthly.value;targetGmv.value=j.targetGmv||targetGmv.value;anchorHistory.value=j.anchorHistory||[];if(j.fetchedAt)updateDate.value=String(j.fetchedAt).slice(0,10);initHistRange();await nextTick();initCharts()}catch(e){console.error('数据加载失败',e);toastMsg.value='数据加载失败，请稍后刷新'}finally{loading.value=false}}
+  async function loadData(){try{const res=await fetch('dashboard_data.json?t='+Date.now());if(!res.ok)throw new Error('HTTP '+res.status);const j=await res.json();knownDays.value=j.knownDays||[];latestData.value=j.latest||null;if(j.latest){dailyTx.value=j.latest.b||0;dailySpend.value=j.latest.c||0;dailyRoi.value=j.latest.c>0?(j.latest.b/j.latest.c).toFixed(2):'--'}const rawAnchors=j.anchors||[];{const merged={};for(const a of rawAnchors){const key=anchorKey(a.name);if(!key)continue;if(!merged[key])merged[key]={name:key,gmv:0,spend:0,roi:0,hours:0,days:0};merged[key].gmv+=Number(a.gmv||0);merged[key].spend+=Number(a.spend||0);merged[key].hours+=Number(a.hours||0);merged[key].days++}sortedAnchors.value=Object.values(merged).map(a=>({...a,roi:a.spend>0?+(a.gmv/a.spend).toFixed(2):0})).sort((x,y)=>y.gmv-x.gmv)}videoData.value=j.video||videoData.value;postalData.value=j.postal||postalData.value;videoMonthly.value=j.videoMonthly||videoMonthly.value;postalMonthly.value=j.postalMonthly||postalMonthly.value;targetGmv.value=j.targetGmv||targetGmv.value;anchorHistory.value=j.anchorHistory||[];if(j.fetchedAt)updateDate.value=String(j.fetchedAt).slice(0,10);initHistRange();await nextTick();initCharts()}catch(e){console.error('数据加载失败',e);toastMsg.value='数据加载失败，请稍后刷新'}finally{loading.value=false}}
   async function captureScreenshot(){capturing.value=true;const btn=document.querySelector('#screenshotBtn');if(btn)btn.style.visibility='hidden';try{await new Promise(r=>setTimeout(r,100));const canvas=await html2canvas(document.querySelector('#app'),{scale:2,backgroundColor:'#020c1e',useCORS:true,logging:false});const image=canvas.toDataURL('image/png');const res=await fetch('http://127.0.0.1:5176/save-screenshot',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({image})});const data=await res.json();toastMsg.value=data.ok?'已保存到桌面：'+data.path:'保存失败'}catch(e){console.error(e);toastMsg.value='保存失败，请确认截图服务已启动'}finally{if(btn)btn.style.visibility='visible';capturing.value=false;setTimeout(()=>toastMsg.value='',3200)}}
   function resizeCharts(){gmvChart?.resize();anchorChart?.resize();trendChart?.resize();anchorHistChart?.resize()}
 
@@ -315,14 +315,18 @@ createApp({setup(){
   })
 
   // 日期范围内主播聚合（按 name 汇总 GMV/消耗，ROI=合计GMV/合计消耗，days=出场天数）
+  // 双人主播（如 "查查+吴老师"）数据记入第一人名下
+  function anchorKey(name){return String(name||'').split('+')[0].trim()}
   const histAnchors=computed(()=>{
     if(!histStart.value||!histEnd.value)return[]
     const agg={}
     for(const blk of anchorHistory.value){
       if(blk.date<histStart.value||blk.date>histEnd.value)continue
       for(const a of blk.anchors||[]){
-        if(!agg[a.name])agg[a.name]={name:a.name,gmv:0,spend:0,days:0}
-        agg[a.name].gmv+=Number(a.gmv||0);agg[a.name].spend+=Number(a.spend||0);agg[a.name].days++
+        const key=anchorKey(a.name)
+        if(!key)continue
+        if(!agg[key])agg[key]={name:key,gmv:0,spend:0,days:0}
+        agg[key].gmv+=Number(a.gmv||0);agg[key].spend+=Number(a.spend||0);agg[key].days++
       }
     }
     return Object.values(agg).map(a=>({...a,roi:a.spend>0?a.gmv/a.spend:0})).sort((x,y)=>y.gmv-x.gmv)
@@ -347,7 +351,7 @@ createApp({setup(){
     if(histRangeDays.value>31){histEnd.value=histStart.value?new Date(new Date(histStart.value).getTime()+30*86400000).toISOString().slice(0,10):histEnd.value}
     nextTick(()=>{renderTrend();renderAnchorHist()})
   }
-  function switchView(v){view.value=v;if(v==='history'){nextTick(()=>{renderTrend();renderAnchorHist()})}}
+  function switchView(v){view.value=v;nextTick(()=>{if(v==='main'){initCharts();resizeCharts()}else{renderTrend();renderAnchorHist()}})}
   function selectCard(key){selectedCard.value=key;nextTick(renderTrend)}
   function renderTrend(){
     const el=trendChartRef.value;if(!el)return
