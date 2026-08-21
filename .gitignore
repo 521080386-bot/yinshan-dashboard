@@ -29,3 +29,9 @@ write_yinshan_report.sh
 
 # ===== 本机配置 =====
 *.local.json
+
+# ===== 敏感凭据（严禁入库）=====
+.zhipu_key
+.env
+*secret*
+*token*
