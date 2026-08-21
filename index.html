@@ -89,8 +89,8 @@ button{font:inherit}
 .quick-btn:hover{border-color:var(--cyan);color:#fff}
 .quick-btn.active{background:linear-gradient(135deg,#0755b0,#087bd4);color:#fff;border-color:#238ce5;box-shadow:0 0 10px rgba(0,130,255,.35)}
 .hist-card .hc-change{display:inline-flex;align-items:center;gap:5px;font-size:14px;font-weight:750;padding:2px 9px;border-radius:8px}
-.hist-card .hc-change.up{color:#20d6a0;background:rgba(32,214,160,.12)}
-.hist-card .hc-change.down{color:#ff6b6e;background:rgba(255,107,110,.12)}
+.hist-card .hc-change.up{color:#ff6b6e;background:rgba(255,107,110,.12)}
+.hist-card .hc-change.down{color:#20d6a0;background:rgba(32,214,160,.12)}
 .hist-card .hc-change.flat{color:#9fc3ea;background:rgba(159,195,234,.1)}
 .history-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px}
 .hist-card{border:1px solid rgba(19,112,194,.6);background:linear-gradient(180deg,#081d38,#05152b);padding:14px 16px;cursor:pointer;transition:all .18s;box-shadow:inset 0 0 0 2px rgba(3,49,93,.6);position:relative;overflow:hidden}
@@ -99,7 +99,7 @@ button{font:inherit}
 .hist-card.selected::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--cyan);box-shadow:0 0 10px var(--cyan)}
 .hist-card .hc-label{font-size:13px;color:#c2d6ec;font-weight:650;display:flex;align-items:center;gap:7px}
 .hist-card .hc-value{font-size:30px;font-weight:800;margin-top:7px;letter-spacing:-.02em;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
-.hist-card .hc-sub{font-size:12px;color:#8fb0d4;font-weight:550;margin-top:6px}
+.hist-card .hc-sub{font-size:12px;color:#8fb0d4;font-weight:550;margin-top:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .hist-card .hc-pct{display:inline-block;font-size:22px;font-weight:800;padding:1px 10px;border-radius:10px;background:rgba(255,152,0,.16);color:var(--orange);letter-spacing:0;align-self:center}
 .hist-card .hc-chip{font-size:11px;color:#9fc3ea;background:rgba(31,94,158,.4);padding:2px 8px;border-radius:9px;margin-left:auto}
 .trend-wrap{margin-top:10px;border:1px solid rgba(19,112,194,.72);background:linear-gradient(180deg,#071a34,#05152b);box-shadow:inset 0 0 0 2px rgba(3,49,93,.7)}
@@ -115,6 +115,16 @@ button{font:inherit}
 .anchor-hist-table .rank.r2{background:linear-gradient(135deg,#9fb8c9,#5b7d99);color:#fff}
 .anchor-hist-table .rank.r3{background:linear-gradient(135deg,#d08c5a,#a05a2c);color:#fff}
 .no-data{padding:40px;text-align:center;color:#8fb0d4;font-size:15px}
+/* ===== 漏斗图 ===== */
+.funnel-layout{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(340px,1fr);gap:10px;padding:8px 12px 12px}
+#funnelChart{height:340px;width:100%}
+.funnel-rates{display:grid;grid-template-columns:1fr;gap:8px;align-content:center}
+.funnel-rate{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;background:linear-gradient(90deg,rgba(17,50,87,.72),rgba(8,30,57,.42));border:1px solid rgba(54,117,184,.25)}
+.funnel-rate .fr-label{font-size:14px;color:#c9dcef;font-weight:650;display:flex;align-items:center;gap:8px}
+.funnel-rate .fr-label i{color:#52b4ff;font-size:16px}
+.funnel-rate .fr-value{font-size:19px;font-weight:800;color:#ffd04d}
+.funnel-note{grid-column:1/-1;color:#8fb0d4;font-size:12px;padding:0 4px}
+@media(max-width:1250px){.funnel-layout{grid-template-columns:1fr}}
 @media(max-width:1250px){#app{min-width:1024px}.metric-value{font-size:39px}.analytics-grid{grid-template-columns:1.6fr 1fr}.anchor-layout{grid-template-columns:1.45fr 1fr}.top-meta{gap:5px}.meta-chip{padding:7px 8px}.history-cards{grid-template-columns:repeat(2,1fr)}.anchor-hist-layout{grid-template-columns:1fr}}
 </style>
 </head>
@@ -162,6 +172,21 @@ button{font:inherit}
   </div>
 
   <section class="anchor-panel" style="margin-top:10px">
+    <div class="panel-head"><i class="ri-filter-3-line"></i>直播间转化漏斗 <small>{{ funnel ? '阴山优麦冲饮旗舰店 · ' + funnelDate : '暂无数据' }}</small></div>
+    <div v-if="funnel" class="funnel-layout">
+      <div id="funnelChart" ref="funnelChartRef"></div>
+      <div class="funnel-rates">
+        <div class="funnel-rate"><span class="fr-label"><i class="ri-eye-line"></i>曝光-观看率（人数）</span><span class="fr-value">{{ funnel.rate_view }}%</span></div>
+        <div class="funnel-rate"><span class="fr-label"><i class="ri-eye-off-line"></i>观看-商品曝光率（人数）</span><span class="fr-value">{{ funnel.rate_prod_exposure }}%</span></div>
+        <div class="funnel-rate"><span class="fr-label"><i class="ri-cursor-line"></i>商品曝光-点击率（人数）</span><span class="fr-value">{{ funnel.rate_click }}%</span></div>
+        <div class="funnel-rate"><span class="fr-label"><i class="ri-shopping-cart-line"></i>商品点击-成交转化率（人数）</span><span class="fr-value">{{ funnel.rate_buy }}%</span></div>
+        <div class="funnel-rate"><span class="fr-label"><i class="ri-trophy-line"></i>曝光-成交转化率（人数）</span><span class="fr-value">{{ funnel.rate_total }}%</span></div>
+      </div>
+    </div>
+    <div v-else class="no-data">暂无直播漏斗数据（需本地 Excel 生成，云端定时刷新保留最近值）</div>
+  </section>
+
+  <section class="anchor-panel" style="margin-top:10px">
     <div class="panel-head"><i class="ri-user-star-line"></i>主播班次数据</div>
     <div class="anchor-layout">
       <div id="anchorChart" ref="anchorChartRef"></div>
@@ -195,43 +220,43 @@ button{font:inherit}
     <div class="history-cards">
       <div class="hist-card" :class="{selected:selectedCard==='total'}" @click="selectCard('total')">
         <div class="hc-label"><i class="ri-money-cny-circle-line" style="color:#35c976"></i>总成交金额</div>
-        <div class="hc-value" style="color:#35c976">{{ fmt(histTotal.gmv) }} <span class="hc-pct">{{ histTotal.pct.total }}</span></div>
-        <div class="hc-sub"><span class="hc-change" :class="histTotal.change.total.cls"><i :class="histTotal.change.total.icon"></i>较上周期 {{ histTotal.change.total.txt }}</span></div>
+        <div class="hc-value" style="color:#35c976">{{ fmt(histTotal.gmv) }}</div>
+        <div class="hc-sub"><span class="hc-pct">{{ histTotal.pct.total }}</span><span class="hc-change" :class="histTotal.change.total.cls"><i :class="histTotal.change.total.icon"></i>较上周期 {{ histTotal.change.total.txt }}</span></div>
       </div>
       <div class="hist-card" :class="{selected:selectedCard==='spend'}" @click="selectCard('spend')">
         <div class="hc-label"><i class="ri-fire-line" style="color:#ff9800"></i>总消耗金额</div>
-        <div class="hc-value" style="color:#ff9800">{{ fmt(histTotal.spend) }} <span class="hc-pct">{{ histTotal.pct.spend }}</span></div>
-        <div class="hc-sub"><span class="hc-change" :class="histTotal.change.spend.cls"><i :class="histTotal.change.spend.icon"></i>较上周期 {{ histTotal.change.spend.txt }}</span></div>
+        <div class="hc-value" style="color:#ff9800">{{ fmt(histTotal.spend) }}</div>
+        <div class="hc-sub"><span class="hc-pct">{{ histTotal.pct.spend }}</span><span class="hc-change" :class="histTotal.change.spend.cls"><i :class="histTotal.change.spend.icon"></i>较上周期 {{ histTotal.change.spend.txt }}</span></div>
       </div>
       <div class="hist-card" :class="{selected:selectedCard==='roi'}" @click="selectCard('roi')">
         <div class="hc-label"><i class="ri-percent-line" style="color:#b78cff"></i>全店ROI</div>
-        <div class="hc-value" style="color:#b78cff">{{ histTotal.roi }} <span class="hc-pct">{{ histTotal.pct.roi }}</span></div>
-        <div class="hc-sub"><span class="hc-change" :class="histTotal.change.roi.cls"><i :class="histTotal.change.roi.icon"></i>较上周期 {{ histTotal.change.roi.txt }}</span></div>
+        <div class="hc-value" style="color:#b78cff">{{ histTotal.roi }}</div>
+        <div class="hc-sub"><span class="hc-pct">{{ histTotal.pct.roi }}</span><span class="hc-change" :class="histTotal.change.roi.cls"><i :class="histTotal.change.roi.icon"></i>较上周期 {{ histTotal.change.roi.txt }}</span></div>
       </div>
       <div class="hist-card" :class="{selected:selectedCard==='live'}" @click="selectCard('live')">
         <div class="hc-label"><i class="ri-live-line" style="color:#4b91ff"></i>直播GMV</div>
-        <div class="hc-value" style="color:#4b91ff">{{ fmt(histTotal.live) }} <span class="hc-pct">{{ histTotal.pct.live }}</span></div>
-        <div class="hc-sub"><span class="hc-change" :class="histTotal.change.live.cls"><i :class="histTotal.change.live.icon"></i>较上周期 {{ histTotal.change.live.txt }}</span></div>
+        <div class="hc-value" style="color:#4b91ff">{{ fmt(histTotal.live) }}</div>
+        <div class="hc-sub"><span class="hc-pct">{{ histTotal.pct.live }}</span><span class="hc-change" :class="histTotal.change.live.cls"><i :class="histTotal.change.live.icon"></i>较上周期 {{ histTotal.change.live.txt }}</span></div>
       </div>
       <div class="hist-card" :class="{selected:selectedCard==='short_video'}" @click="selectCard('short_video')">
         <div class="hc-label"><i class="ri-movie-line" style="color:#ff4d4f"></i>短视频GMV</div>
-        <div class="hc-value" style="color:#ff4d4f">{{ fmt(histTotal.short_video) }} <span class="hc-pct">{{ histTotal.pct.short_video }}</span></div>
-        <div class="hc-sub"><span class="hc-change" :class="histTotal.change.short_video.cls"><i :class="histTotal.change.short_video.icon"></i>较上周期 {{ histTotal.change.short_video.txt }}</span></div>
+        <div class="hc-value" style="color:#ff4d4f">{{ fmt(histTotal.short_video) }}</div>
+        <div class="hc-sub"><span class="hc-pct">{{ histTotal.pct.short_video }}</span><span class="hc-change" :class="histTotal.change.short_video.cls"><i :class="histTotal.change.short_video.icon"></i>较上周期 {{ histTotal.change.short_video.txt }}</span></div>
       </div>
       <div class="hist-card" :class="{selected:selectedCard==='card'}" @click="selectCard('card')">
         <div class="hc-label"><i class="ri-box-3-line" style="color:#12c9e8"></i>商品卡</div>
-        <div class="hc-value" style="color:#12c9e8">{{ fmt(histTotal.card) }} <span class="hc-pct">{{ histTotal.pct.card }}</span></div>
-        <div class="hc-sub"><span class="hc-change" :class="histTotal.change.card.cls"><i :class="histTotal.change.card.icon"></i>较上周期 {{ histTotal.change.card.txt }}</span></div>
+        <div class="hc-value" style="color:#12c9e8">{{ fmt(histTotal.card) }}</div>
+        <div class="hc-sub"><span class="hc-pct">{{ histTotal.pct.card }}</span><span class="hc-change" :class="histTotal.change.card.cls"><i :class="histTotal.change.card.icon"></i>较上周期 {{ histTotal.change.card.txt }}</span></div>
       </div>
       <div class="hist-card" :class="{selected:selectedCard==='graphic'}" @click="selectCard('graphic')">
         <div class="hc-label"><i class="ri-image-line" style="color:#ff4d4f"></i>图文</div>
-        <div class="hc-value" style="color:#ff4d4f">{{ fmt(histTotal.graphic) }} <span class="hc-pct">{{ histTotal.pct.graphic }}</span></div>
-        <div class="hc-sub"><span class="hc-change" :class="histTotal.change.graphic.cls"><i :class="histTotal.change.graphic.icon"></i>较上周期 {{ histTotal.change.graphic.txt }}</span></div>
+        <div class="hc-value" style="color:#ff4d4f">{{ fmt(histTotal.graphic) }}</div>
+        <div class="hc-sub"><span class="hc-pct">{{ histTotal.pct.graphic }}</span><span class="hc-change" :class="histTotal.change.graphic.cls"><i :class="histTotal.change.graphic.icon"></i>较上周期 {{ histTotal.change.graphic.txt }}</span></div>
       </div>
       <div class="hist-card" :class="{selected:selectedCard==='other'}" @click="selectCard('other')">
         <div class="hc-label"><i class="ri-file-list-3-line" style="color:#b78cff"></i>其他</div>
-        <div class="hc-value" style="color:#b78cff">{{ fmt(histTotal.other) }} <span class="hc-pct">{{ histTotal.pct.other }}</span></div>
-        <div class="hc-sub"><span class="hc-change" :class="histTotal.change.other.cls"><i :class="histTotal.change.other.icon"></i>较上周期 {{ histTotal.change.other.txt }}</span></div>
+        <div class="hc-value" style="color:#b78cff">{{ fmt(histTotal.other) }}</div>
+        <div class="hc-sub"><span class="hc-pct">{{ histTotal.pct.other }}</span><span class="hc-change" :class="histTotal.change.other.cls"><i :class="histTotal.change.other.icon"></i>较上周期 {{ histTotal.change.other.txt }}</span></div>
       </div>
     </div>
 
@@ -266,6 +291,8 @@ createApp({setup(){
   const view=ref('main'),anchorHistory=ref([])
   const trendChartRef=ref(null),anchorHistChartRef=ref(null)
   const selectedCard=ref('total'),histStart=ref(''),histEnd=ref(''),histMaxDate=ref(''),quickKey=ref('7d')
+  const funnelChartRef=ref(null),funnel=ref(null)
+  const funnelDate=computed(()=>{const s=funnel.value?.date||'';return s?`${s.slice(0,4)}-${s.slice(4,6)}-${s.slice(6,8)}`:''})
   const showScreenshot=computed(()=>{const h=location.hostname;return !(h.endsWith('github.io')||h.includes('vercel.app')||h.includes('netlify.app'))})
   let trendChart=null,anchorHistChart=null
   const yearLabel=computed(()=>String(updateDate.value||'').slice(0,4)||'2026')
@@ -282,17 +309,32 @@ createApp({setup(){
     {label:'直播GMV',value:fmt(d.d),color:'#4b91ff',icon:'ri-live-line'},{label:'短视频GMV',value:fmt(d.e),color:'#ff4d4f',icon:'ri-movie-line'},
     {label:'商品卡',value:fmt(d.f),color:'#12c9e8',icon:'ri-box-3-line'},{label:'其他',value:fmt(d.g),color:'#b78cff',icon:'ri-file-list-3-line'},
     {label:'图文',value:fmt(d.h),color:'#ff4d4f',icon:'ri-image-line'}]})
-  let gmvChart=null,anchorChart=null,timer=null,reloadTimer=null
+  let gmvChart=null,anchorChart=null,funnelChart=null,timer=null,reloadTimer=null
   function chartBase(){return{backgroundColor:'transparent',textStyle:{fontFamily:'-apple-system,BlinkMacSystemFont,Segoe UI,PingFang SC,Microsoft YaHei,sans-serif'},animationDuration:650}}
+  function initFunnelChart(){
+    if(!funnelChartRef.value||!funnel.value)return
+    if(funnelChart)funnelChart.dispose()
+    funnelChart=echarts.init(funnelChartRef.value)
+    const f=funnel.value
+    const steps=[
+      {name:'直播间曝光',value:f.exposure,color:'#4b91ff'},
+      {name:'直播间观看',value:f.views,color:'#12c9e8'},
+      {name:'商品曝光',value:f.prod_exposure,color:'#35c976'},
+      {name:'商品点击',value:f.prod_click,color:'#ffb02e'},
+      {name:'成交人数',value:f.buyers,color:'#ff4d4f'},
+    ]
+    funnelChart.setOption({...chartBase(),tooltip:{trigger:'item',backgroundColor:'#06172e',borderColor:'#237ece',textStyle:{color:'#fff'},formatter:p=>`${p.name}<br/>${p.value.toLocaleString()} 人<br/>占上一级 ${p.data.prevPct}% · 占首级 ${p.data.firstPct}%`},series:[{type:'funnel',left:'4%',right:'6%',top:14,bottom:10,width:'82%',minSize:'18%',maxSize:'100%',sort:'descending',gap:3,label:{show:true,position:'inside',color:'#fff',fontSize:14,fontWeight:700,formatter:p=>`${p.name}\n${p.value.toLocaleString()}人`},labelLine:{length:10,lineStyle:{color:'#6f8ead'}},itemStyle:{borderColor:'#020c1e',borderWidth:2},data:steps.map((s,i)=>({name:s.name,value:s.value,itemStyle:{color:s.color},prevPct:i>0?(s.value/steps[i-1].value*100).toFixed(1):'100',firstPct:(s.value/steps[0].value*100).toFixed(1)}))}]})
+  }
   function initCharts(){
-    if(gmvChart)gmvChart.dispose();if(anchorChart)anchorChart.dispose()
+    if(gmvChart)gmvChart.dispose();if(anchorChart)anchorChart.dispose();if(funnelChart)funnelChart.dispose()
     gmvChart=echarts.init(gmvChartRef.value);anchorChart=echarts.init(anchorChartRef.value)
+    initFunnelChart()
     gmvChart.setOption({...chartBase(),tooltip:{trigger:'axis',backgroundColor:'#06172e',borderColor:'#237ece',textStyle:{color:'#fff'}},legend:{data:['抖音GMV','ROI'],top:12,textStyle:{color:'#eaf3ff',fontSize:14,fontWeight:600},itemGap:24},grid:{top:54,left:70,right:60,bottom:48},xAxis:{type:'category',data:knownDays.value.map(d=>d.day+'日'),axisLine:{lineStyle:{color:'#6f8ead'}},axisTick:{show:false},axisLabel:{color:'#d8e5f5',fontSize:13,interval:2,margin:13}},yAxis:[{type:'value',name:'抖音GMV',nameTextStyle:{color:'#bcd3ed',fontSize:13,padding:[0,0,8,0]},splitLine:{lineStyle:{color:'rgba(107,145,185,.22)',type:'dashed'}},axisLine:{show:true,lineStyle:{color:'#476887'}},axisLabel:{color:'#d8e5f5',fontSize:12,formatter:v=>(v/10000).toFixed(2)+'万'}},{type:'value',name:'ROI',min:2,max:4,nameTextStyle:{color:'#ff6262',fontSize:13,padding:[0,0,8,0]},splitLine:{show:false},axisLine:{show:true,lineStyle:{color:'#476887'}},axisLabel:{color:'#d8e5f5',fontSize:12}}],series:[{name:'抖音GMV',type:'bar',data:knownDays.value.map(d=>d.dv),barWidth:14,itemStyle:{color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'#5ba0ff'},{offset:1,color:'#276ed1'}])}},{name:'ROI',type:'line',yAxisIndex:1,data:knownDays.value.map(d=>d.sp>0?+(d.dv/d.sp).toFixed(2):0),smooth:true,symbol:'circle',symbolSize:7,lineStyle:{color:'#ff453a',width:3},itemStyle:{color:'#ff453a',borderColor:'#fff',borderWidth:1}}]})
     anchorChart.setOption({...chartBase(),tooltip:{trigger:'axis',backgroundColor:'#06172e',borderColor:'#237ece',textStyle:{color:'#fff'}},legend:{data:['GMV','消耗','ROI'],top:4,textStyle:{color:'#eaf3ff',fontSize:14,fontWeight:600},itemGap:20},grid:{top:48,left:62,right:55,bottom:40},xAxis:{type:'category',data:sortedAnchors.value.map(a=>a.name),axisLine:{lineStyle:{color:'#6f8ead'}},axisTick:{show:false},axisLabel:{color:'#f2f7ff',fontSize:14,fontWeight:600}},yAxis:[{type:'value',name:'GMV / 消耗',nameTextStyle:{color:'#bcd3ed',fontSize:12},splitLine:{lineStyle:{color:'rgba(107,145,185,.2)',type:'dashed'}},axisLabel:{color:'#d8e5f5',fontSize:12,formatter:v=>(v/10000).toFixed(2)+'万'}},{type:'value',name:'ROI',min:2,nameTextStyle:{color:'#ff6262',fontSize:12},splitLine:{show:false},axisLabel:{color:'#d8e5f5',fontSize:12}}],series:[{name:'GMV',type:'bar',data:sortedAnchors.value.map(a=>a.gmv),barWidth:22,itemStyle:{color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'#5ba0ff'},{offset:1,color:'#276ed1'}])}},{name:'消耗',type:'bar',data:sortedAnchors.value.map(a=>a.spend),barWidth:22,itemStyle:{color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'#ffb02e'},{offset:1,color:'#df7500'}])}},{name:'ROI',type:'line',yAxisIndex:1,data:sortedAnchors.value.map(a=>Number(a.roi||0)),smooth:true,symbol:'circle',symbolSize:9,lineStyle:{color:'#ff453a',width:3},itemStyle:{color:'#ff453a'},label:{show:true,position:'top',formatter:p=>Number(p.value).toFixed(2),color:'#fff',fontSize:12,fontWeight:700}}]})
   }
-  async function loadData(){try{const res=await fetch('dashboard_data.json?t='+Date.now());if(!res.ok)throw new Error('HTTP '+res.status);const j=await res.json();knownDays.value=j.knownDays||[];latestData.value=j.latest||null;if(j.latest){dailyTx.value=j.latest.b||0;dailySpend.value=j.latest.c||0;dailyRoi.value=j.latest.c>0?(j.latest.b/j.latest.c).toFixed(2):'--'}const rawAnchors=j.anchors||[];{const merged={};for(const a of rawAnchors){const key=anchorKey(a.name);if(!key)continue;if(!merged[key])merged[key]={name:key,gmv:0,spend:0,roi:0,hours:0,days:0};merged[key].gmv+=Number(a.gmv||0);merged[key].spend+=Number(a.spend||0);merged[key].hours+=Number(a.hours||0);merged[key].days++}sortedAnchors.value=Object.values(merged).map(a=>({...a,roi:a.spend>0?+(a.gmv/a.spend).toFixed(2):0})).sort((x,y)=>y.gmv-x.gmv)}videoData.value=j.video||videoData.value;postalData.value=j.postal||postalData.value;videoMonthly.value=j.videoMonthly||videoMonthly.value;postalMonthly.value=j.postalMonthly||postalMonthly.value;targetGmv.value=j.targetGmv||targetGmv.value;anchorHistory.value=j.anchorHistory||[];if(j.fetchedAt)updateDate.value=String(j.fetchedAt).slice(0,10);initHistRange();await nextTick();initCharts()}catch(e){console.error('数据加载失败',e);toastMsg.value='数据加载失败，请稍后刷新'}finally{loading.value=false}}
+  async function loadData(){try{const res=await fetch('dashboard_data.json?t='+Date.now());if(!res.ok)throw new Error('HTTP '+res.status);const j=await res.json();knownDays.value=j.knownDays||[];latestData.value=j.latest||null;if(j.latest){dailyTx.value=j.latest.b||0;dailySpend.value=j.latest.c||0;dailyRoi.value=j.latest.c>0?(j.latest.b/j.latest.c).toFixed(2):'--'}const rawAnchors=j.anchors||[];{const merged={};for(const a of rawAnchors){const key=anchorKey(a.name);if(!key)continue;if(!merged[key])merged[key]={name:key,gmv:0,spend:0,roi:0,hours:0,days:0};merged[key].gmv+=Number(a.gmv||0);merged[key].spend+=Number(a.spend||0);merged[key].hours+=Number(a.hours||0);merged[key].days++}sortedAnchors.value=Object.values(merged).map(a=>({...a,roi:a.spend>0?+(a.gmv/a.spend).toFixed(2):0})).sort((x,y)=>y.gmv-x.gmv)}videoData.value=j.video||videoData.value;postalData.value=j.postal||postalData.value;videoMonthly.value=j.videoMonthly||videoMonthly.value;postalMonthly.value=j.postalMonthly||postalMonthly.value;targetGmv.value=j.targetGmv||targetGmv.value;anchorHistory.value=j.anchorHistory||[];funnel.value=j.funnel||null;if(j.fetchedAt)updateDate.value=String(j.fetchedAt).slice(0,10);initHistRange();await nextTick();initCharts();setTimeout(initFunnelChart,300);setTimeout(()=>{if(funnelChartRef.value&&funnel.value&&!funnelChart)initFunnelChart()},1000)}catch(e){console.error('数据加载失败',e);toastMsg.value='数据加载失败，请稍后刷新'}finally{loading.value=false}}
   async function captureScreenshot(){capturing.value=true;const btn=document.querySelector('#screenshotBtn');if(btn)btn.style.visibility='hidden';try{await new Promise(r=>setTimeout(r,100));const canvas=await html2canvas(document.querySelector('#app'),{scale:2,backgroundColor:'#020c1e',useCORS:true,logging:false});const image=canvas.toDataURL('image/png');const res=await fetch('http://127.0.0.1:5176/save-screenshot',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({image})});const data=await res.json();toastMsg.value=data.ok?'已保存到桌面：'+data.path:'保存失败'}catch(e){console.error(e);toastMsg.value='保存失败，请确认截图服务已启动'}finally{if(btn)btn.style.visibility='visible';capturing.value=false;setTimeout(()=>toastMsg.value='',3200)}}
-  function resizeCharts(){gmvChart?.resize();anchorChart?.resize();trendChart?.resize();anchorHistChart?.resize()}
+  function resizeCharts(){gmvChart?.resize();anchorChart?.resize();funnelChart?.resize();trendChart?.resize();anchorHistChart?.resize()}
 
   // ================= 历史数据查询 =================
   const CARD_META={
@@ -338,6 +380,7 @@ createApp({setup(){
     const p=pctChange(cur,prev)
     if(p===null)return{cls:'flat',icon:'ri-subtract-line',txt:'暂无对比'}
     const up=p>=0
+    // 上涨红色↑、下跌绿色↓（2026-08-21 用户要求）
     return{cls:up?'up':'down',icon:up?'ri-arrow-up-line':'ri-arrow-down-line',txt:Math.abs(p).toFixed(1)+'%'}
   }
   const histTotal=computed(()=>{
@@ -415,9 +458,9 @@ createApp({setup(){
       const lastDayPrev=new Date(firstThis);lastDayPrev.setDate(0) // 上月最后一天
       const firstPrev=new Date(lastDayPrev.getFullYear(),lastDayPrev.getMonth(),1)
       s=firstPrev;e=lastDayPrev
-    }else{ // thisMonth
+    }else{ // thisMonth: 当月1号 ~ 前一日
       s=new Date(today.getFullYear(),today.getMonth(),1)
-      e=new Date(today)
+      e=new Date(today);e.setDate(e.getDate()-1)
     }
     histStart.value=iso(s);histEnd.value=iso(e);quickKey.value=key
     nextTick(()=>{renderTrend();renderAnchorHist()})
@@ -455,7 +498,7 @@ createApp({setup(){
   watch(selectedCard,()=>nextTick(renderTrend))
   onMounted(async()=>{await loadData();let r=300;timer=setInterval(()=>{r--;if(r<0){r=300;loadData()}countdown.value=String(Math.floor(r/60)).padStart(2,'0')+':'+String(r%60).padStart(2,'0')},1000);reloadTimer=setInterval(loadData,300000);window.addEventListener('resize',resizeCharts)})
   onUnmounted(()=>{clearInterval(timer);clearInterval(reloadTimer);window.removeEventListener('resize',resizeCharts);gmvChart?.dispose();anchorChart?.dispose()})
-  return{loading,countdown,capturing,toastMsg,gmvChartRef,anchorChartRef,updateDate,yearLabel,currentMonth,targetGmv,cumulativeTx,salesGap,cumulativeRoi,dayRange,remainingDays,dailyTargetNeed,dailyTx,dailySpend,dailyRoi,summaryItems,sortedAnchors,videoData,postalData,videoMonthly,postalMonthly,fmt,captureScreenshot,view,switchView,showScreenshot,histStart,histEnd,histMaxDate,histRangeDays,onHistRangeChange,quickKey,applyQuick,histTotal,histDaysData,histAnchors,selectedCard,selectCard,trendTitle,trendChartRef,anchorHistChartRef}
+  return{loading,countdown,capturing,toastMsg,gmvChartRef,anchorChartRef,updateDate,yearLabel,currentMonth,targetGmv,cumulativeTx,salesGap,cumulativeRoi,dayRange,remainingDays,dailyTargetNeed,dailyTx,dailySpend,dailyRoi,summaryItems,sortedAnchors,videoData,postalData,videoMonthly,postalMonthly,fmt,captureScreenshot,view,switchView,showScreenshot,histStart,histEnd,histMaxDate,histRangeDays,onHistRangeChange,quickKey,applyQuick,histTotal,histDaysData,histAnchors,selectedCard,selectCard,trendTitle,trendChartRef,anchorHistChartRef,funnelChartRef,funnel,funnelDate}
 }}).mount('#app')
 </script>
 </body>

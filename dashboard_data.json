@@ -5592,6 +5592,40 @@
       ]
     },
     {
+      "serial": 46253,
+      "date": "2026-08-19",
+      "anchors": [
+        {
+          "name": "查查",
+          "gmv": 27243.0,
+          "spend": 10924.0,
+          "roi": 2.49,
+          "hours": 4.5
+        },
+        {
+          "name": "张铭",
+          "gmv": 28514.0,
+          "spend": 11417.0,
+          "roi": 2.5,
+          "hours": 4.5
+        },
+        {
+          "name": "王硕",
+          "gmv": 18442.0,
+          "spend": 6975.0,
+          "roi": 2.64,
+          "hours": 4.5
+        },
+        {
+          "name": "杨琼",
+          "gmv": 17125.0,
+          "spend": 5414.0,
+          "roi": 3.16,
+          "hours": 4.5
+        }
+      ]
+    },
+    {
       "serial": 46254,
       "date": "2026-08-20",
       "anchors": [
@@ -5658,5 +5692,18 @@
   },
   "targetGmv": 2800000,
   "targetRoi": 3,
-  "fetchedAt": "2026-08-21 16:27:20"
+  "funnel": {
+    "exposure": 223844.0,
+    "views": 21624.0,
+    "prod_exposure": 19547.0,
+    "prod_click": 4660.0,
+    "buyers": 865.0,
+    "rate_view": 9.66,
+    "rate_prod_exposure": 90.39,
+    "rate_click": 23.84,
+    "rate_buy": 18.56,
+    "rate_total": 0.39,
+    "date": "20260820"
+  },
+  "fetchedAt": "2026-08-21 18:28:02"
 }

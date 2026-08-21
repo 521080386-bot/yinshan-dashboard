@@ -7,9 +7,12 @@
   DASHBOARD_SHEET_TOKEN   仪表盘数据源表 token（UUAtO2）
   HANDOFF_SHEET_TOKEN     主播班次表 token（KFTIUP）
 身份固定使用 bot（--as bot），便于在 CI 中运行。
+
+漏斗数据（funnel）从本地最新「直播明细_全部账号_*.xlsx」提取；CI 云端无
+本地 Excel 时保留上一版值（不覆盖）。
 """
-import json, subprocess, sys, os, re, ast
-from datetime import datetime
+import json, subprocess, sys, os, re, ast, glob
+from datetime import datetime, date
 
 LARK_CLI = os.environ.get("LARK_CLI", "/Users/apple/Documents/Codex/2026-06-03/cli/lark-cli")
 TOKEN = os.environ.get("DASHBOARD_SHEET_TOKEN", "Jos6sfYSRh4eWXtZalBcoFetnCe")
@@ -219,6 +222,49 @@ def fetch_anchor_history():
     return history
 
 
+def fetch_funnel_from_excel():
+    """从本地最新「直播明细_全部账号_*.xlsx」提取阴山优麦冲饮旗舰店直播漏斗数据。
+    返回 dict（曝光/观看/商品曝光/商品点击/成交人数 + 各转化率），无文件时返回 None。
+    列：曝光人数=6, 观看人数=8, 商品曝光人数=20, 商品点击人数=21, 成交人数=29。
+    """
+    try:
+        from openpyxl import load_workbook
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        files = sorted(glob.glob(os.path.join(base_dir, "直播明细_全部账号_*.xlsx")))
+        if not files:
+            return None
+        wb = load_workbook(files[-1], data_only=True, read_only=True)
+        ws = wb["直播间明细"]
+        f = {"exposure": 0.0, "views": 0.0, "prod_exposure": 0.0, "prod_click": 0.0, "buyers": 0.0}
+        for row in ws.iter_rows(min_row=2, values_only=True):
+            if row and row[1] == "阴山优麦冲饮旗舰店":
+                f["exposure"] += float(row[6] or 0)
+                f["views"] += float(row[8] or 0)
+                f["prod_exposure"] += float(row[20] or 0)
+                f["prod_click"] += float(row[21] or 0)
+                f["buyers"] += float(row[29] or 0)
+        wb.close()
+        if f["exposure"] <= 0:
+            return None
+        def rate(a, b):
+            return round(a / b * 100, 2) if b else 0
+        # 文件名形如 直播明细_全部账号_20260820_20260820.xlsx，取中间 8 位日期
+        import re as _re
+        m = _re.search(r"(\d{8})_", files[-1])
+        return {
+            **f,
+            "rate_view": rate(f["views"], f["exposure"]),          # 曝光-观看率
+            "rate_prod_exposure": rate(f["prod_exposure"], f["views"]),  # 观看-商品曝光率
+            "rate_click": rate(f["prod_click"], f["prod_exposure"]),      # 商品曝光-点击率
+            "rate_buy": rate(f["buyers"], f["prod_click"]),              # 商品点击-成交转化率
+            "rate_total": rate(f["buyers"], f["exposure"]),              # 曝光-成交转化率
+            "date": m.group(1) if m else "",
+        }
+    except Exception as e:
+        print(f"[warn] funnel excel: {e}", file=sys.stderr)
+        return None
+
+
 def rounded(v, d=2):
     return round(float(v) + 1e-9, d)
 
@@ -332,6 +378,19 @@ def fetch_data():
         out["postalMonthly"] = {"gmv": 0, "spend": 0, "roi": 0}
     out["targetGmv"] = 2800000
     out["targetRoi"] = 3
+    # 漏斗数据：优先本地 Excel（最新日期）；CI 云端无 Excel 时保留上一版值
+    funnel = fetch_funnel_from_excel()
+    if funnel is not None:
+        out["funnel"] = funnel
+    elif os.path.exists(OUTPUT):
+        try:
+            prev = json.load(open(OUTPUT, encoding="utf-8"))
+            if prev.get("funnel"):
+                out["funnel"] = prev["funnel"]
+        except Exception:
+            pass
+    if "funnel" not in out:
+        out["funnel"] = None
     out["fetchedAt"] = subprocess.run(
         ["date", "+%Y-%m-%d %H:%M:%S"], capture_output=True, text=True
     ).stdout.strip()
