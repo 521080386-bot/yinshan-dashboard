@@ -116,12 +116,13 @@ button{font:inherit}
 .anchor-hist-table .rank.r3{background:linear-gradient(135deg,#d08c5a,#a05a2c);color:#fff}
 .no-data{padding:40px;text-align:center;color:#8fb0d4;font-size:15px}
 /* ===== 漏斗图 ===== */
-.funnel-layout{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(340px,1fr);gap:10px;padding:8px 12px 12px}
-#funnelChart{height:340px;width:100%}
+.funnel-layout{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(360px,1fr);gap:10px;padding:8px 12px 12px}
+#funnelChart{height:380px;width:100%}
 .funnel-rates{display:grid;grid-template-columns:1fr;gap:8px;align-content:center}
 .funnel-rate{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;background:linear-gradient(90deg,rgba(17,50,87,.72),rgba(8,30,57,.42));border:1px solid rgba(54,117,184,.25)}
 .funnel-rate .fr-label{font-size:14px;color:#c9dcef;font-weight:650;display:flex;align-items:center;gap:8px}
 .funnel-rate .fr-label i{color:#52b4ff;font-size:16px}
+.funnel-rate .fr-badge{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;border-radius:50%;font-size:11px;font-weight:800;color:#0a2547;background:linear-gradient(135deg,#5ba0ff,#3d7fe0);box-shadow:0 0 6px rgba(70,150,255,.5)}
 .funnel-rate .fr-value{font-size:19px;font-weight:800;color:#ffd04d}
 .funnel-note{grid-column:1/-1;color:#8fb0d4;font-size:12px;padding:0 4px}
 @media(max-width:1250px){.funnel-layout{grid-template-columns:1fr}}
@@ -172,15 +173,15 @@ button{font:inherit}
   </div>
 
   <section class="anchor-panel" style="margin-top:10px">
-    <div class="panel-head"><i class="ri-filter-3-line"></i>直播间转化漏斗 <small>{{ funnel ? '阴山优麦冲饮旗舰店 · ' + funnelDate : '暂无数据' }}</small></div>
+    <div class="panel-head"><i class="ri-filter-3-line"></i>成交转化漏斗 <small>{{ funnel ? '阴山优麦冲饮旗舰店 · ' + funnelDate : '暂无数据' }}</small></div>
     <div v-if="funnel" class="funnel-layout">
       <div id="funnelChart" ref="funnelChartRef"></div>
       <div class="funnel-rates">
-        <div class="funnel-rate"><span class="fr-label"><i class="ri-eye-line"></i>曝光-观看率（人数）</span><span class="fr-value">{{ funnel.rate_view }}%</span></div>
-        <div class="funnel-rate"><span class="fr-label"><i class="ri-eye-off-line"></i>观看-商品曝光率（人数）</span><span class="fr-value">{{ funnel.rate_prod_exposure }}%</span></div>
-        <div class="funnel-rate"><span class="fr-label"><i class="ri-cursor-line"></i>商品曝光-点击率（人数）</span><span class="fr-value">{{ funnel.rate_click }}%</span></div>
-        <div class="funnel-rate"><span class="fr-label"><i class="ri-shopping-cart-line"></i>商品点击-成交转化率（人数）</span><span class="fr-value">{{ funnel.rate_buy }}%</span></div>
-        <div class="funnel-rate"><span class="fr-label"><i class="ri-trophy-line"></i>曝光-成交转化率（人数）</span><span class="fr-value">{{ funnel.rate_total }}%</span></div>
+        <div class="funnel-rate"><span class="fr-label"><span class="fr-badge">①</span><i class="ri-eye-line"></i>曝光-观看率（人数）</span><span class="fr-value">{{ funnel.rate_view }}%</span></div>
+        <div class="funnel-rate"><span class="fr-label"><span class="fr-badge">②</span><i class="ri-eye-off-line"></i>观看-商品曝光率（人数）</span><span class="fr-value">{{ funnel.rate_prod_exposure }}%</span></div>
+        <div class="funnel-rate"><span class="fr-label"><span class="fr-badge">③</span><i class="ri-cursor-line"></i>商品曝光-点击率（人数）</span><span class="fr-value">{{ funnel.rate_click }}%</span></div>
+        <div class="funnel-rate"><span class="fr-label"><span class="fr-badge">④</span><i class="ri-shopping-cart-line"></i>商品点击-成交转化率（人数）</span><span class="fr-value">{{ funnel.rate_buy }}%</span></div>
+        <div class="funnel-rate"><span class="fr-label"><span class="fr-badge">⑤</span><i class="ri-trophy-line"></i>曝光-成交转化率（人数）</span><span class="fr-value">{{ funnel.rate_total }}%</span></div>
       </div>
     </div>
     <div v-else class="no-data">暂无直播漏斗数据（需本地 Excel 生成，云端定时刷新保留最近值）</div>
@@ -316,14 +317,17 @@ createApp({setup(){
     if(funnelChart)funnelChart.dispose()
     funnelChart=echarts.init(funnelChartRef.value)
     const f=funnel.value
+    // 蓝紫色系渐变：深 → 浅
+    const colors=['#1a3a8f','#2b55c8','#3d72e8','#5390f5','#6faeff']
     const steps=[
-      {name:'直播间曝光',value:f.exposure,color:'#4b91ff'},
-      {name:'直播间观看',value:f.views,color:'#12c9e8'},
-      {name:'商品曝光',value:f.prod_exposure,color:'#35c976'},
-      {name:'商品点击',value:f.prod_click,color:'#ffb02e'},
-      {name:'成交人数',value:f.buyers,color:'#ff4d4f'},
+      {name:'直播间曝光人数',value:f.exposure,rate:f.rate_view},
+      {name:'直播间观看人数',value:f.views,rate:f.rate_prod_exposure},
+      {name:'商品曝光人数',value:f.prod_exposure,rate:f.rate_click},
+      {name:'商品点击人数',value:f.prod_click,rate:f.rate_buy},
+      {name:'成交人数',value:f.buyers,rate:f.rate_total},
     ]
-    funnelChart.setOption({...chartBase(),tooltip:{trigger:'item',backgroundColor:'#06172e',borderColor:'#237ece',textStyle:{color:'#fff'},formatter:p=>`${p.name}<br/>${p.value.toLocaleString()} 人<br/>占上一级 ${p.data.prevPct}% · 占首级 ${p.data.firstPct}%`},series:[{type:'funnel',left:'4%',right:'6%',top:14,bottom:10,width:'82%',minSize:'18%',maxSize:'100%',sort:'descending',gap:3,label:{show:true,position:'inside',color:'#fff',fontSize:14,fontWeight:700,formatter:p=>`${p.name}\n${p.value.toLocaleString()}人`},labelLine:{length:10,lineStyle:{color:'#6f8ead'}},itemStyle:{borderColor:'#020c1e',borderWidth:2},data:steps.map((s,i)=>({name:s.name,value:s.value,itemStyle:{color:s.color},prevPct:i>0?(s.value/steps[i-1].value*100).toFixed(1):'100',firstPct:(s.value/steps[0].value*100).toFixed(1)}))}]})
+    const w=v=>v>=10000?(v/10000).toFixed(2)+'万':v.toLocaleString()
+    funnelChart.setOption({...chartBase(),tooltip:{trigger:'item',backgroundColor:'#06172e',borderColor:'#237ece',textStyle:{color:'#fff'},formatter:p=>`${p.name}<br/>${w(p.value)} 人`},graphic:steps.slice(0,4).map((s,i)=>({type:'text',left:'87%',top:8+i*19,style:{text:`${s.rate}% ①`,fill:'#ffd04d',fontSize:12,fontWeight:800,textShadowBlur:4,textShadowColor:'rgba(255,208,77,.4)'}})),series:[{type:'funnel',left:'2%',right:'20%',top:16,bottom:16,minSize:'16%',maxSize:'100%',sort:'descending',gap:4,label:{show:true,position:'inside',color:'#fff',fontSize:13,fontWeight:700,lineHeight:20,formatter:p=>`{n|${p.name}}\n{v|${w(p.value)} 人}`,rich:{n:{color:'#e8f2ff',fontSize:13,fontWeight:600},v:{color:'#ffffff',fontSize:16,fontWeight:800}}},labelLine:{length:10,lineStyle:{color:'#6f8ead'}},itemStyle:{borderColor:'#020c1e',borderWidth:2,opacity:.96},data:steps.map((s,i)=>({name:s.name,value:s.value,itemStyle:{color:colors[i],shadowBlur:12,shadowColor:colors[i]+'66'}}))}]})
   }
   function initCharts(){
     if(gmvChart)gmvChart.dispose();if(anchorChart)anchorChart.dispose();if(funnelChart)funnelChart.dispose()
