@@ -17,11 +17,13 @@ HANDOFF = os.environ.get("HANDOFF_SHEET_TOKEN", "shtcnwOdgFZCQAf4ZjiR5egkoTc")
 HANDOFF_SHEET = "KFTIUP"
 OUTPUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dashboard_data.json")
 
-def lark_read(token, range_expr):
+def lark_read(token, range_expr, value_render=None):
     cmd = [LARK_CLI, "sheets", "+read", "--as", "bot",
            "--spreadsheet-token", token,
            "--range", range_expr,
            "--format", "json"]
+    if value_render:
+        cmd += ["--value-render-option", value_render]
     try:
         r = subprocess.run(cmd, capture_output=True, text=True, timeout=15)
         data = json.loads(r.stdout)
@@ -92,80 +94,52 @@ def eval_formula(value, cells, visiting=None):
     except:
         return 0.0
 
-def fetch_anchors():
-    """Read latest anchor data from KFTIUP handoff sheet."""
-    values = lark_read(HANDOFF, f"{HANDOFF_SHEET}!A:I")
-    if not values:
-        return []
+def excel_serial(day):
+    """date -> Excel serial number."""
+    from datetime import date
+    return (day - date(1899, 12, 30)).days
 
-    # Build cell map for formula resolution
-    cells = {}
-    for r_idx, row in enumerate(values, start=1):
-        for c_idx, val in enumerate(row):
-            cells[f"{col_num(c_idx)}{r_idx}"] = val
 
-    # Find latest block with at least 5 rows (name/hours/GMV/cost/ROI)
-   # Iterate backwards to find the last complete block
-    i = len(values) - 1
-    while i >= 0:
-        row = values[i]
-        if row and pn(row[0]) is not None and pn(row[0]) > 0:
-            if i + 4 < len(values):
-                # Check if any anchor names exist (B, D, F, H columns)
-                has_name = False
-                for co in (1, 3, 5, 7):
-                    if len(row) > co + 1 and row[co + 1] is not None and str(row[co + 1]).strip() not in ('', 'None'):
-                        has_name = True
-                        break
-                if has_name:
-                    # Also check GMV row (i+2) has actual data
-                    gmv_row = values[i + 2] if i + 2 < len(values) else []
-                    has_gmv = False
-                    for co in (2, 4, 6, 8):
-                        if len(gmv_row) > co and gmv_row[co] is not None and str(gmv_row[co]).strip() not in ('', 'None'):
-                            has_gmv = True
-                            break
-                    if has_gmv:
-                        break
-        i -= 1
-    else:
-        return []  # no complete block found
+def serial_to_date(serial):
+    """Excel serial number -> date."""
+    from datetime import date
+    return date(1899, 12, 30) + __import__("datetime").timedelta(days=int(serial))
 
-    latest_start = i
+
+def parse_anchor_block(values, start_idx):
+    """Parse one 5-row anchor block starting at start_idx. Returns list of anchors."""
     anchors = []
     for col_offset in (1, 3, 5, 7):  # B, D, F, H
-        name_row = values[latest_start]
-        name = name_row[col_offset + 1] if len(name_row) > col_offset + 1 else None
-        if not name or not name.strip():
+        name_row = values[start_idx]
+        if len(name_row) <= col_offset + 1:
             continue
-        name_str = str(name).strip().replace("冲饮主播：", "")
-        if not name_str:
+        name = name_row[col_offset + 1]
+        if not name or not str(name).strip():
             continue
-        if name_str.startswith("主播"):
+        name_str = str(name).strip().replace("冲饮主播：", "").strip()
+        if not name_str or name_str.startswith("主播"):
             continue
 
-        # Hours
         hrs = 0
-        if latest_start + 1 < len(values):
-            hrs_row = values[latest_start + 1]
+        if start_idx + 1 < len(values):
+            hrs_row = values[start_idx + 1]
             if len(hrs_row) > col_offset + 1:
                 hrs = pn(hrs_row[col_offset + 1]) or 0
 
-        # GMV
         gmv = 0
-        if latest_start + 2 < len(values):
-            gmv_row = values[latest_start + 2]
+        if start_idx + 2 < len(values):
+            gmv_row = values[start_idx + 2]
             if len(gmv_row) > col_offset + 1:
-                gmv_raw = gmv_row[col_offset + 1]
-                gmv = rounded(eval_formula(gmv_raw, cells), 2)
+                gmv = rounded(pn(gmv_row[col_offset + 1]) or 0, 2)
 
-        # Cost
         cost = 0
-        if latest_start + 3 < len(values):
-            cost_row = values[latest_start + 3]
+        if start_idx + 3 < len(values):
+            cost_row = values[start_idx + 3]
             if len(cost_row) > col_offset + 1:
-                cost_raw = cost_row[col_offset + 1]
-                cost = rounded(eval_formula(cost_raw, cells), 2)
+                cost = rounded(pn(cost_row[col_offset + 1]) or 0, 2)
+
+        if gmv == 0 and cost == 0:
+            continue  # 无数据的空主播位跳过
 
         anchors.append({
             "name": name_str,
@@ -174,8 +148,76 @@ def fetch_anchors():
             "roi": round(gmv / cost, 2) if cost > 0 else 0,
             "hours": hrs,
         })
-
     return anchors
+
+
+def fetch_anchor_blocks():
+    """读取 KFTIUP 全部日期块（FormattedValue 直接取公式计算值）。
+    返回 {serial: anchors_list}，按日期升序。
+    A 列在 FormattedValue 模式下可能是日期字符串（如 2026/03/15）或 serial 数字，均需兼容。"""
+    values = lark_read(HANDOFF, f"{HANDOFF_SHEET}!A:I", value_render="FormattedValue")
+    if not values:
+        return {}
+
+    def to_serial(v):
+        """把 A 列值转成 Excel serial。支持数字或日期字符串。"""
+        n = pn(v)
+        if n is not None and n > 0:
+            return int(n)
+        if isinstance(v, str) and "/" in v:
+            try:
+                import datetime as _dt
+                d = _dt.datetime.strptime(v.strip(), "%Y/%m/%d").date()
+                return excel_serial(d)
+            except Exception:
+                return None
+        return None
+
+    blocks = {}
+    i = 0
+    while i < len(values):
+        row = values[i]
+        serial = to_serial(row[0]) if row else None
+        if serial is not None and serial > 0 and i + 4 < len(values):
+            anchors = parse_anchor_block(values, i)
+            if anchors:
+                blocks[serial] = anchors
+            i += 5
+        else:
+            i += 1
+    return blocks
+
+
+def fetch_anchors(target_serial=None):
+    """读取指定日期（Excel serial）的主播数据。默认取 blocks 中 <= 最新一天的最近块。
+    注意：KFTIUP 中可能存在"当日"（数据未填完）块，因此默认按调用方传入的
+    target_serial（通常为最新完整数据日 = 前一日）取数，避免取到当日不完整数据。"""
+    blocks = fetch_anchor_blocks()
+    if not blocks:
+        return []
+    if target_serial is not None and int(target_serial) in blocks:
+        return blocks[int(target_serial)]
+    # 回退：取所有块中 serial 最大的
+    last = max(blocks.keys())
+    return blocks[last]
+
+
+def fetch_anchor_history():
+    """全部日期块的主播历史数据，转成 [{serial, date, anchors:[...]}] 升序。
+    date 为 YYYY-MM-DD 字符串，供前端历史查询按日期范围筛选。"""
+    blocks = fetch_anchor_blocks()
+    if not blocks:
+        return []
+    history = []
+    for serial in sorted(blocks.keys()):
+        day = serial_to_date(serial)
+        history.append({
+            "serial": serial,
+            "date": day.isoformat(),
+            "anchors": blocks[serial],
+        })
+    return history
+
 
 def rounded(v, d=2):
     return round(float(v) + 1e-9, d)
@@ -196,7 +238,16 @@ def fetch_data():
         sp = pn(row[2]) if len(row) > 2 else None
         if dv is not None:
             day_num = i + 1
-            known.append({"day": day_num, "dv": dv, "sp": sp or 0})
+            known.append({
+                "day": day_num,
+                "dv": dv,
+                "sp": sp or 0,
+                "live": pn(row[3]) if len(row) > 3 else None,
+                "short_video": pn(row[4]) if len(row) > 4 else None,
+                "card": pn(row[5]) if len(row) > 5 else None,
+                "other": pn(row[6]) if len(row) > 6 else None,
+                "graphic": pn(row[7]) if len(row) > 7 else None,
+            })
             latest_idx = i
 
             pg = pn(row[9]) if len(row) > 9 else None
@@ -240,7 +291,16 @@ def fetch_data():
         out["video"] = {"gmv": 0, "spend": 0, "roi": 0}
 
     # 主播班次数据（从 KFTIUP 读取）
-    out["anchors"] = fetch_anchors()
+    # target_serial = 最新完整数据日的 Excel serial（取 knownDays 最新一天对应日期）
+    # 需求：主播栏维持前一日数据，不取 KFTIUP 中"当日"（可能未填完）的块
+    if latest_idx is not None:
+        latest_date_serial = pn(rows[latest_idx][0])
+    else:
+        latest_date_serial = None
+    out["anchors"] = fetch_anchors(latest_date_serial)
+
+    # 历史主播数据（全部日期块，供历史查询页使用）
+    out["anchorHistory"] = fetch_anchor_history()
 
     # 读取月度汇总数据 from specific cells
     cmd2 = [LARK_CLI, "sheets", "+read", "--as", "bot",
