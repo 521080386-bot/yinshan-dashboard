@@ -84,6 +84,14 @@ button{font:inherit}
 .history-toolbar input[type=date]{background:#081d38;border:1px solid #1e6fbb;color:#eaf3ff;padding:7px 10px;border-radius:6px;font-size:14px;font-family:inherit}
 .history-toolbar input[type=date]:focus{outline:none;border-color:var(--cyan)}
 .history-toolbar .range-info{color:#ffb84d;font-size:13px;font-weight:650}
+.quick-btns{display:flex;gap:8px;margin-left:6px}
+.quick-btn{padding:7px 14px;border:1px solid #1e6fbb;border-radius:6px;background:#081d38;color:#cfe4fb;font-size:13px;font-weight:650;cursor:pointer;transition:all .15s}
+.quick-btn:hover{border-color:var(--cyan);color:#fff}
+.quick-btn.active{background:linear-gradient(135deg,#0755b0,#087bd4);color:#fff;border-color:#238ce5;box-shadow:0 0 10px rgba(0,130,255,.35)}
+.hist-card .hc-change{display:inline-flex;align-items:center;gap:5px;font-size:14px;font-weight:750;padding:2px 9px;border-radius:8px}
+.hist-card .hc-change.up{color:#20d6a0;background:rgba(32,214,160,.12)}
+.hist-card .hc-change.down{color:#ff6b6e;background:rgba(255,107,110,.12)}
+.hist-card .hc-change.flat{color:#9fc3ea;background:rgba(159,195,234,.1)}
 .history-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px}
 .hist-card{border:1px solid rgba(19,112,194,.6);background:linear-gradient(180deg,#081d38,#05152b);padding:14px 16px;cursor:pointer;transition:all .18s;box-shadow:inset 0 0 0 2px rgba(3,49,93,.6);position:relative;overflow:hidden}
 .hist-card:hover{transform:translateY(-2px);border-color:#2f9ff0}
@@ -174,6 +182,12 @@ button{font:inherit}
       <input type="date" v-model="histStart" :max="histEnd" @change="onHistRangeChange">
       <label>结束日期</label>
       <input type="date" v-model="histEnd" :min="histStart" :max="histMaxDate" @change="onHistRangeChange">
+      <div class="quick-btns">
+        <button class="quick-btn" :class="{active:quickKey==='7d'}" @click="applyQuick('7d')">近7天</button>
+        <button class="quick-btn" :class="{active:quickKey==='lastWeek'}" @click="applyQuick('lastWeek')">上周</button>
+        <button class="quick-btn" :class="{active:quickKey==='lastMonth'}" @click="applyQuick('lastMonth')">上月</button>
+        <button class="quick-btn" :class="{active:quickKey==='thisMonth'}" @click="applyQuick('thisMonth')">本月</button>
+      </div>
       <span class="range-info" v-if="histRangeDays>31">⚠️ 时间跨度不能超过 31 天（当前 {{ histRangeDays }} 天）</span>
       <span class="range-info" v-else>已选 {{ histRangeDays }} 天</span>
     </div>
@@ -181,43 +195,43 @@ button{font:inherit}
     <div class="history-cards">
       <div class="hist-card" :class="{selected:selectedCard==='total'}" @click="selectCard('total')">
         <div class="hc-label"><i class="ri-money-cny-circle-line" style="color:#35c976"></i>总成交金额</div>
-        <div class="hc-value" style="color:#35c976">{{ fmt(histTotal.gmv) }}</div>
-        <div class="hc-sub">区间累计 GMV</div>
+        <div class="hc-value" style="color:#35c976">{{ fmt(histTotal.gmv) }} <span class="hc-pct">{{ histTotal.pct.total }}</span></div>
+        <div class="hc-sub"><span class="hc-change" :class="histTotal.change.total.cls"><i :class="histTotal.change.total.icon"></i>较上周期 {{ histTotal.change.total.txt }}</span></div>
       </div>
       <div class="hist-card" :class="{selected:selectedCard==='spend'}" @click="selectCard('spend')">
         <div class="hc-label"><i class="ri-fire-line" style="color:#ff9800"></i>总消耗金额</div>
-        <div class="hc-value" style="color:#ff9800">{{ fmt(histTotal.spend) }}</div>
-        <div class="hc-sub">区间累计消耗</div>
+        <div class="hc-value" style="color:#ff9800">{{ fmt(histTotal.spend) }} <span class="hc-pct">{{ histTotal.pct.spend }}</span></div>
+        <div class="hc-sub"><span class="hc-change" :class="histTotal.change.spend.cls"><i :class="histTotal.change.spend.icon"></i>较上周期 {{ histTotal.change.spend.txt }}</span></div>
       </div>
       <div class="hist-card" :class="{selected:selectedCard==='roi'}" @click="selectCard('roi')">
         <div class="hc-label"><i class="ri-percent-line" style="color:#b78cff"></i>全店ROI</div>
-        <div class="hc-value" style="color:#b78cff">{{ histTotal.roi }}</div>
-        <div class="hc-sub">GMV ÷ 消耗</div>
+        <div class="hc-value" style="color:#b78cff">{{ histTotal.roi }} <span class="hc-pct">{{ histTotal.pct.roi }}</span></div>
+        <div class="hc-sub"><span class="hc-change" :class="histTotal.change.roi.cls"><i :class="histTotal.change.roi.icon"></i>较上周期 {{ histTotal.change.roi.txt }}</span></div>
       </div>
       <div class="hist-card" :class="{selected:selectedCard==='live'}" @click="selectCard('live')">
         <div class="hc-label"><i class="ri-live-line" style="color:#4b91ff"></i>直播GMV</div>
         <div class="hc-value" style="color:#4b91ff">{{ fmt(histTotal.live) }} <span class="hc-pct">{{ histTotal.pct.live }}</span></div>
-        <div class="hc-sub">直播渠道成交</div>
+        <div class="hc-sub"><span class="hc-change" :class="histTotal.change.live.cls"><i :class="histTotal.change.live.icon"></i>较上周期 {{ histTotal.change.live.txt }}</span></div>
       </div>
       <div class="hist-card" :class="{selected:selectedCard==='short_video'}" @click="selectCard('short_video')">
         <div class="hc-label"><i class="ri-movie-line" style="color:#ff4d4f"></i>短视频GMV</div>
         <div class="hc-value" style="color:#ff4d4f">{{ fmt(histTotal.short_video) }} <span class="hc-pct">{{ histTotal.pct.short_video }}</span></div>
-        <div class="hc-sub">短视频渠道成交</div>
+        <div class="hc-sub"><span class="hc-change" :class="histTotal.change.short_video.cls"><i :class="histTotal.change.short_video.icon"></i>较上周期 {{ histTotal.change.short_video.txt }}</span></div>
       </div>
       <div class="hist-card" :class="{selected:selectedCard==='card'}" @click="selectCard('card')">
         <div class="hc-label"><i class="ri-box-3-line" style="color:#12c9e8"></i>商品卡</div>
         <div class="hc-value" style="color:#12c9e8">{{ fmt(histTotal.card) }} <span class="hc-pct">{{ histTotal.pct.card }}</span></div>
-        <div class="hc-sub">商品卡渠道成交</div>
+        <div class="hc-sub"><span class="hc-change" :class="histTotal.change.card.cls"><i :class="histTotal.change.card.icon"></i>较上周期 {{ histTotal.change.card.txt }}</span></div>
       </div>
       <div class="hist-card" :class="{selected:selectedCard==='graphic'}" @click="selectCard('graphic')">
         <div class="hc-label"><i class="ri-image-line" style="color:#ff4d4f"></i>图文</div>
         <div class="hc-value" style="color:#ff4d4f">{{ fmt(histTotal.graphic) }} <span class="hc-pct">{{ histTotal.pct.graphic }}</span></div>
-        <div class="hc-sub">图文渠道成交</div>
+        <div class="hc-sub"><span class="hc-change" :class="histTotal.change.graphic.cls"><i :class="histTotal.change.graphic.icon"></i>较上周期 {{ histTotal.change.graphic.txt }}</span></div>
       </div>
       <div class="hist-card" :class="{selected:selectedCard==='other'}" @click="selectCard('other')">
         <div class="hc-label"><i class="ri-file-list-3-line" style="color:#b78cff"></i>其他</div>
         <div class="hc-value" style="color:#b78cff">{{ fmt(histTotal.other) }} <span class="hc-pct">{{ histTotal.pct.other }}</span></div>
-        <div class="hc-sub">其他渠道成交</div>
+        <div class="hc-sub"><span class="hc-change" :class="histTotal.change.other.cls"><i :class="histTotal.change.other.icon"></i>较上周期 {{ histTotal.change.other.txt }}</span></div>
       </div>
     </div>
 
@@ -251,7 +265,7 @@ createApp({setup(){
   // ===== 历史查询状态 =====
   const view=ref('main'),anchorHistory=ref([])
   const trendChartRef=ref(null),anchorHistChartRef=ref(null)
-  const selectedCard=ref('total'),histStart=ref(''),histEnd=ref(''),histMaxDate=ref('')
+  const selectedCard=ref('total'),histStart=ref(''),histEnd=ref(''),histMaxDate=ref(''),quickKey=ref('7d')
   const showScreenshot=computed(()=>{const h=location.hostname;return !(h.endsWith('github.io')||h.includes('vercel.app')||h.includes('netlify.app'))})
   let trendChart=null,anchorHistChart=null
   const yearLabel=computed(()=>String(updateDate.value||'').slice(0,4)||'2026')
@@ -295,23 +309,52 @@ createApp({setup(){
   const histRangeDays=computed(()=>{if(!histStart.value||!histEnd.value)return 0;const a=new Date(histStart.value),b=new Date(histEnd.value);return Math.round((b-a)/86400000)+1})
 
   // 日期范围内 knownDays 的数据（day 1..N → 当月日期）
-  const histDaysData=computed(()=>{
-    if(!histStart.value||!histEnd.value)return []
+  function rangeDaysOf(start,end){
     const out=[]
     for(const d of knownDays.value){
       const y=Number(String(updateDate.value||'').slice(0,4))||2026
       const m=currentMonth.value
       const dateStr=`${y}-${String(m).padStart(2,'0')}-${String(d.day).padStart(2,'0')}`
-      if(dateStr>=histStart.value&&dateStr<=histEnd.value)out.push({...d,date:dateStr})
+      if(dateStr>=start&&dateStr<=end)out.push({...d,date:dateStr})
     }
     return out
+  }
+  const histDaysData=computed(()=>{if(!histStart.value||!histEnd.value)return[];return rangeDaysOf(histStart.value,histEnd.value)})
+  // 上周期（与当前区间等长的前一段）
+  const prevPeriodData=computed(()=>{
+    if(!histStart.value||!histEnd.value)return[]
+    const days=histRangeDays.value
+    const s=new Date(histStart.value);s.setDate(s.getDate()-days)
+    const e=new Date(histStart.value);e.setDate(e.getDate()-1)
+    return rangeDaysOf(s.toISOString().slice(0,10),e.toISOString().slice(0,10))
   })
-  const histTotal=computed(()=>{
-    const days=histDaysData.value
+  function aggDays(days){
     let gmv=0,spend=0,live=0,sv=0,card=0,graphic=0,other=0
     for(const d of days){gmv+=Number(d.dv||0);spend+=Number(d.sp||0);live+=Number(d.live||0);sv+=Number(d.short_video||0);card+=Number(d.card||0);graphic+=Number(d.graphic||0);other+=Number(d.other||0)}
-    const pct=v=>gmv>0?(v/gmv*100).toFixed(1)+'%':'0%'
-    return{gmv,spend,roi:spend>0?(gmv/spend).toFixed(2):'--',live,short_video:sv,card,graphic,other,pct:{live:pct(live),short_video:pct(sv),card:pct(card),graphic:pct(graphic),other:pct(other)}}
+    return{gmv,spend,live,short_video:sv,card,graphic,other,roi:spend>0?gmv/spend:0}
+  }
+  function pctChange(cur,prev){if(!prev||prev<=0)return null;return(cur-prev)/prev*100}
+  function changeObj(cur,prev){
+    const p=pctChange(cur,prev)
+    if(p===null)return{cls:'flat',icon:'ri-subtract-line',txt:'暂无对比'}
+    const up=p>=0
+    return{cls:up?'up':'down',icon:up?'ri-arrow-up-line':'ri-arrow-down-line',txt:Math.abs(p).toFixed(1)+'%'}
+  }
+  const histTotal=computed(()=>{
+    const cur=aggDays(histDaysData.value)
+    const prev=aggDays(prevPeriodData.value)
+    const pct=v=>cur.gmv>0?(v/cur.gmv*100).toFixed(1)+'%':'0%'
+    const change={
+      total:changeObj(cur.gmv,prev.gmv),
+      spend:changeObj(cur.spend,prev.spend),
+      roi:changeObj(cur.roi,prev.roi),
+      live:changeObj(cur.live,prev.live),
+      short_video:changeObj(cur.short_video,prev.short_video),
+      card:changeObj(cur.card,prev.card),
+      graphic:changeObj(cur.graphic,prev.graphic),
+      other:changeObj(cur.other,prev.other),
+    }
+    return{...cur,roi:cur.spend>0?cur.roi.toFixed(2):'--',pct:{total:cur.gmv>0?'100%':'0%',spend:cur.gmv>0?(cur.spend/cur.gmv*100).toFixed(1)+'%':'0%',roi:cur.gmv>0?(cur.spend/cur.gmv*100).toFixed(1)+'%':'0%',live:pct(cur.live),short_video:pct(cur.short_video),card:pct(cur.card),graphic:pct(cur.graphic),other:pct(cur.other)},change}
   })
 
   // 日期范围内主播聚合（按 name 汇总 GMV/消耗，ROI=合计GMV/合计消耗，days=出场天数）
@@ -349,6 +392,34 @@ createApp({setup(){
   }
   function onHistRangeChange(){
     if(histRangeDays.value>31){histEnd.value=histStart.value?new Date(new Date(histStart.value).getTime()+30*86400000).toISOString().slice(0,10):histEnd.value}
+    quickKey.value=''
+    nextTick(()=>{renderTrend();renderAnchorHist()})
+  }
+  // 快捷时间范围：近7天 / 上周 / 上月 / 本月
+  function applyQuick(key){
+    const today=new Date()
+    const pad=n=>String(n).padStart(2,'0')
+    const iso=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`
+    let s,e
+    if(key==='7d'){
+      e=new Date(today);s=new Date(today);s.setDate(s.getDate()-6)
+    }else if(key==='lastWeek'){
+      // 上周一 ~ 上周日
+      const dow=(today.getDay()+6)%7 // 0=周一
+      const thisMon=new Date(today);thisMon.setDate(today.getDate()-dow)
+      const lastMon=new Date(thisMon);lastMon.setDate(thisMon.getDate()-7)
+      const lastSun=new Date(lastMon);lastSun.setDate(lastMon.getDate()+6)
+      s=lastMon;e=lastSun
+    }else if(key==='lastMonth'){
+      const firstThis=new Date(today.getFullYear(),today.getMonth(),1)
+      const lastDayPrev=new Date(firstThis);lastDayPrev.setDate(0) // 上月最后一天
+      const firstPrev=new Date(lastDayPrev.getFullYear(),lastDayPrev.getMonth(),1)
+      s=firstPrev;e=lastDayPrev
+    }else{ // thisMonth
+      s=new Date(today.getFullYear(),today.getMonth(),1)
+      e=new Date(today)
+    }
+    histStart.value=iso(s);histEnd.value=iso(e);quickKey.value=key
     nextTick(()=>{renderTrend();renderAnchorHist()})
   }
   function switchView(v){view.value=v;nextTick(()=>{if(v==='main'){initCharts();resizeCharts()}else{renderTrend();renderAnchorHist()}})}
@@ -384,7 +455,7 @@ createApp({setup(){
   watch(selectedCard,()=>nextTick(renderTrend))
   onMounted(async()=>{await loadData();let r=300;timer=setInterval(()=>{r--;if(r<0){r=300;loadData()}countdown.value=String(Math.floor(r/60)).padStart(2,'0')+':'+String(r%60).padStart(2,'0')},1000);reloadTimer=setInterval(loadData,300000);window.addEventListener('resize',resizeCharts)})
   onUnmounted(()=>{clearInterval(timer);clearInterval(reloadTimer);window.removeEventListener('resize',resizeCharts);gmvChart?.dispose();anchorChart?.dispose()})
-  return{loading,countdown,capturing,toastMsg,gmvChartRef,anchorChartRef,updateDate,yearLabel,currentMonth,targetGmv,cumulativeTx,salesGap,cumulativeRoi,dayRange,remainingDays,dailyTargetNeed,dailyTx,dailySpend,dailyRoi,summaryItems,sortedAnchors,videoData,postalData,videoMonthly,postalMonthly,fmt,captureScreenshot,view,switchView,showScreenshot,histStart,histEnd,histMaxDate,histRangeDays,onHistRangeChange,histTotal,histDaysData,histAnchors,selectedCard,selectCard,trendTitle,trendChartRef,anchorHistChartRef}
+  return{loading,countdown,capturing,toastMsg,gmvChartRef,anchorChartRef,updateDate,yearLabel,currentMonth,targetGmv,cumulativeTx,salesGap,cumulativeRoi,dayRange,remainingDays,dailyTargetNeed,dailyTx,dailySpend,dailyRoi,summaryItems,sortedAnchors,videoData,postalData,videoMonthly,postalMonthly,fmt,captureScreenshot,view,switchView,showScreenshot,histStart,histEnd,histMaxDate,histRangeDays,onHistRangeChange,quickKey,applyQuick,histTotal,histDaysData,histAnchors,selectedCard,selectCard,trendTitle,trendChartRef,anchorHistChartRef}
 }}).mount('#app')
 </script>
 </body>
