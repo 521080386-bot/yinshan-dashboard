@@ -199,17 +199,27 @@
       "card": 6958.2,
       "other": 3898.7,
       "graphic": 0.0
+    },
+    {
+      "day": 21,
+      "dv": 109508.91,
+      "sp": 36916.0,
+      "live": 96398.98,
+      "short_video": 608.3,
+      "card": 8472.5,
+      "other": 4029.13,
+      "graphic": 0.0
     }
   ],
   "postalHistory": [],
   "latest": {
-    "day": 20,
-    "b": 97587.26,
-    "c": 33193.0,
-    "d": 86281.46,
-    "e": 448.9,
-    "f": 6958.2,
-    "g": 3898.7,
+    "day": 21,
+    "b": 109508.91,
+    "c": 36916.0,
+    "d": 96398.98,
+    "e": 608.3,
+    "f": 8472.5,
+    "g": 4029.13,
     "h": 0.0
   },
   "postal": {
@@ -218,37 +228,37 @@
     "roi": 0
   },
   "video": {
-    "gmv": 3426.0,
-    "spend": 1461.59,
-    "roi": 2.34
+    "gmv": 2537.0,
+    "spend": 1109.26,
+    "roi": 2.29
   },
   "anchors": [
     {
-      "name": "张铭",
-      "gmv": 31755.0,
-      "spend": 12060.0,
-      "roi": 2.63,
-      "hours": 4.5
-    },
-    {
       "name": "王硕",
-      "gmv": 24307.0,
-      "spend": 9186.0,
-      "roi": 2.65,
+      "gmv": 24614.0,
+      "spend": 9869.0,
+      "roi": 2.49,
       "hours": 4.5
     },
     {
-      "name": "杨琼",
-      "gmv": 15186.0,
-      "spend": 6221.0,
-      "roi": 2.44,
+      "name": "张铭",
+      "gmv": 22592.0,
+      "spend": 8421.0,
+      "roi": 2.68,
       "hours": 4.5
     },
     {
       "name": "孙玉洁",
-      "gmv": 15962.0,
-      "spend": 5351.0,
-      "roi": 2.98,
+      "gmv": 24531.0,
+      "spend": 9789.0,
+      "roi": 2.51,
+      "hours": 4.5
+    },
+    {
+      "name": "查查",
+      "gmv": 23457.0,
+      "spend": 8149.0,
+      "roi": 2.88,
       "hours": 4.5
     }
   ],
@@ -5676,6 +5686,20 @@
           "spend": 8421.0,
           "roi": 2.68,
           "hours": 4.5
+        },
+        {
+          "name": "孙玉洁",
+          "gmv": 24531.0,
+          "spend": 9789.0,
+          "roi": 2.51,
+          "hours": 4.5
+        },
+        {
+          "name": "查查",
+          "gmv": 23457.0,
+          "spend": 8149.0,
+          "roi": 2.88,
+          "hours": 4.5
         }
       ]
     }
@@ -5686,24 +5710,24 @@
     "roi": null
   },
   "videoMonthly": {
-    "gmv": 38112.9,
-    "spend": 15636.84,
-    "roi": 2.4373786519527
+    "gmv": 40649.9,
+    "spend": 16746.1,
+    "roi": 2.42742489296015
   },
   "targetGmv": 2800000,
   "targetRoi": 3,
   "funnel": {
-    "exposure": 223844.0,
-    "views": 21624.0,
-    "prod_exposure": 19547.0,
-    "prod_click": 4660.0,
-    "buyers": 865.0,
-    "rate_view": 9.66,
-    "rate_prod_exposure": 90.39,
-    "rate_click": 23.84,
-    "rate_buy": 18.56,
-    "rate_total": 0.39,
-    "date": "20260820"
+    "exposure": 245666.0,
+    "views": 20167.0,
+    "prod_exposure": 18672.0,
+    "prod_click": 4954.0,
+    "buyers": 937.0,
+    "rate_view": 8.21,
+    "rate_prod_exposure": 92.59,
+    "rate_click": 26.53,
+    "rate_buy": 18.91,
+    "rate_total": 0.38,
+    "date": "20260821"
   },
-  "fetchedAt": "2026-08-21 18:28:02"
+  "fetchedAt": "2026-08-22 09:18:29"
 }
