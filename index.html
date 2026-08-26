@@ -76,8 +76,18 @@ button{font:inherit}
 .toast{position:fixed;right:26px;bottom:78px;z-index:50;background:#07192f;border:1px solid var(--line);color:#fff;padding:12px 18px;box-shadow:0 0 20px rgba(0,100,210,.3)}
 .fade-enter-active,.fade-leave-active{transition:opacity .2s,transform .2s}.fade-enter-from,.fade-leave-to{opacity:0;transform:translateY(8px)}
 /* ===== 历史查询页 ===== */
-.view-btn{margin-left:16px;display:inline-flex;align-items:center;gap:7px;padding:9px 16px;border:1px solid #238ce5;border-radius:8px;background:linear-gradient(135deg,#0755b0,#087bd4);color:#fff;font-weight:700;font-size:14px;cursor:pointer;white-space:nowrap}
-.view-btn:hover{filter:brightness(1.15)}.view-btn.active{background:linear-gradient(135deg,#0a6fd1,#11a3f0);box-shadow:0 0 14px rgba(0,150,255,.45)}
+.nav-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
+.nav-btn{position:relative;height:48px;display:flex;align-items:center;justify-content:center;gap:9px;padding:0 12px;border:1px solid #1e6fbb;background:linear-gradient(180deg,#081d38,#051529);color:#cfe4fb;font-size:15px;font-weight:700;cursor:pointer;transition:all .15s;box-shadow:inset 0 0 0 1px rgba(3,49,93,.6),0 0 12px rgba(0,80,160,.08)}
+.nav-btn i{font-size:19px;color:#66b4ff;flex:none}
+.nav-btn:hover{border-color:#2f9ff0;color:#fff;background:linear-gradient(180deg,#0a2344,#061a32)}
+.nav-btn.active{background:linear-gradient(135deg,#0755b0,#087bd4);color:#fff;border-color:#238ce5;box-shadow:inset 0 0 0 1px rgba(18,201,232,.24),0 0 18px rgba(0,130,255,.34)}
+.nav-btn.active i{color:#9be5ff}
+.nav-btn.active::before{content:"";position:absolute;left:14px;right:14px;top:-1px;height:2px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);box-shadow:0 0 8px var(--cyan)}
+.empty-page{padding:2px 0 20px}
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:430px;gap:16px;color:#9fc3ea;text-align:center;padding:30px}
+.empty-state i{font-size:64px;color:#2b7fbd;opacity:.8}
+.empty-state .empty-title{font-size:24px;font-weight:750;color:#eaf4ff;letter-spacing:.02em}
+.empty-state .empty-desc{font-size:15px;color:#88a8cc}
 .history-page{padding:2px 0 20px}
 .history-toolbar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:12px;padding:14px 18px;border:1px solid rgba(19,112,194,.72);background:linear-gradient(180deg,#071a34,#05152b);box-shadow:inset 0 0 0 2px rgba(3,49,93,.7)}
 .history-toolbar label{color:#d7e6f8;font-size:14px;font-weight:650}
@@ -141,8 +151,6 @@ button{font:inherit}
 
   <header class="topbar">
     <div class="brand">阴山优麦 <span>· 智能矩阵驾驶舱</span></div>
-    <button class="view-btn" :class="{active:view==='history'}" @click="switchView('history')"><i class="ri-history-line"></i>历史数据查询</button>
-    <button v-if="view==='history'" class="view-btn" @click="switchView('main')"><i class="ri-dashboard-line"></i>返回驾驶舱</button>
     <div class="top-meta">
       <div class="meta-chip"><i class="ri-calendar-line"></i> {{ yearLabel }}年{{ currentMonth }}月</div>
       <div class="meta-chip"><i class="ri-user-3-line"></i> 项目经理：姜续</div>
@@ -151,8 +159,14 @@ button{font:inherit}
     </div>
   </header>
 
+  <nav class="nav-bar">
+    <button class="nav-btn" :class="{active:view==='chongyin_daily'}" @click="switchView('chongyin_daily')"><i class="ri-dashboard-line"></i>阴山优麦冲饮旗舰店日报</button>
+    <button class="nav-btn" :class="{active:view==='chongyin_history'}" @click="switchView('chongyin_history')"><i class="ri-history-line"></i>阴山优麦冲饮旗舰店历史数据查询</button>
+    <button class="nav-btn" :class="{active:view==='food_daily'}" @click="switchView('food_daily')"><i class="ri-store-2-line"></i>阴山优麦食品店日报</button>
+    <button class="nav-btn" :class="{active:view==='food_history'}" @click="switchView('food_history')"><i class="ri-file-chart-line"></i>阴山优麦食品店历史数据查询</button>
+  </nav>
   <!-- ===== 主驾驶舱视图 ===== -->
-  <div v-if="view==='main'">
+  <div v-if="view==='chongyin_daily'">
   <section class="section">
     <div class="section-title">累计指标</div>
     <div class="metric-grid">
@@ -193,7 +207,7 @@ button{font:inherit}
   </div><!-- /main view -->
 
   <!-- ===== 历史数据查询视图 ===== -->
-  <div v-if="view==='history'" class="history-page">
+  <div v-if="view==='chongyin_history'" class="history-page">
     <div class="history-toolbar">
       <label><i class="ri-calendar-check-line" style="margin-right:6px"></i>开始日期</label>
       <input type="date" v-model="histStart" :max="histEnd" @change="onHistRangeChange">
@@ -267,6 +281,22 @@ button{font:inherit}
     </section>
   </div><!-- /history view -->
 
+  <!-- ===== 食品店日报视图 ===== -->
+  <div v-if="view==='food_daily'" class="empty-page">
+    <section class="section">
+      <div class="section-title">阴山优麦食品店日报</div>
+      <div class="empty-state"><i class="ri-store-2-line"></i><div class="empty-title">食品店日报暂无数据</div><div class="empty-desc">数据接入后将在此页面展示</div></div>
+    </section>
+  </div>
+
+  <!-- ===== 食品店历史查询视图 ===== -->
+  <div v-if="view==='food_history'" class="empty-page">
+    <section class="section">
+      <div class="section-title">阴山优麦食品店历史数据查询</div>
+      <div class="empty-state"><i class="ri-file-chart-line"></i><div class="empty-title">食品店历史数据暂无</div><div class="empty-desc">数据接入后将在此页面展示</div></div>
+    </section>
+  </div>
+
   <footer class="footer">阴山优麦 · 数据复盘报告 · 数据来源：飞书电子表格</footer>
   <button v-if="showScreenshot" id="screenshotBtn" class="shot" @click="captureScreenshot" :disabled="capturing">{{ capturing ? '保存中…' : '保存截图' }}</button>
   <transition name="fade"><div v-if="toastMsg" class="toast">{{ toastMsg }}</div></transition>
@@ -280,7 +310,7 @@ createApp({setup(){
   const sortedAnchors=ref([]),videoData=ref({gmv:0,spend:0,roi:0}),postalData=ref({gmv:0,spend:0,roi:0}),videoMonthly=ref({gmv:0,spend:0,roi:0}),postalMonthly=ref({gmv:0,spend:0,roi:0})
   const dailyTx=ref(0),dailySpend=ref(0),dailyRoi=ref('--'),updateDate=ref('2026-07-21'),targetGmv=ref(2800000)
   // ===== 历史查询状态 =====
-  const view=ref('main'),anchorHistory=ref([])
+  const view=ref('chongyin_daily'),anchorHistory=ref([])
   const trendChartRef=ref(null),anchorHistChartRef=ref(null)
   const selectedCard=ref('total'),histStart=ref(''),histEnd=ref(''),histMaxDate=ref(''),quickKey=ref('7d')
   const funnel=ref(null)
@@ -478,7 +508,7 @@ createApp({setup(){
     histStart.value=iso(s);histEnd.value=iso(e);quickKey.value=key
     nextTick(()=>{renderTrend();renderAnchorHist()})
   }
-  function switchView(v){view.value=v;nextTick(()=>{if(v==='main'){initCharts();resizeCharts()}else{renderTrend();renderAnchorHist()}})}
+  function switchView(v){view.value=v;nextTick(()=>{if(v==='chongyin_daily'){initCharts();resizeCharts()}else if(v==='chongyin_history'){renderTrend();renderAnchorHist()}})}
   function selectCard(key){selectedCard.value=key;nextTick(renderTrend)}
   function renderTrend(){
     const el=trendChartRef.value;if(!el)return
