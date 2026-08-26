@@ -223,9 +223,11 @@ def fetch_anchor_history():
 
 
 def fetch_funnel_from_excel():
-    """从本地最新「直播明细_全部账号_*.xlsx」提取阴山优麦冲饮旗舰店直播漏斗数据。
-    返回 dict（曝光/观看/商品曝光/商品点击/成交人数 + 各转化率），无文件时返回 None。
-    列：曝光人数=6, 观看人数=8, 商品曝光人数=20, 商品点击人数=21, 成交人数=29。
+    """从本地最新「直播明细_全部账号_*.xlsx」提取阴山优麦冲饮旗舰店直播转化/互动数据。
+    返回 dict（曝光/观看/商品曝光/商品点击/成交人数 + 转化率 + 互动指标），无文件时返回 None。
+    列：曝光人数=6, 曝光次数=7, 观看人数=8, 观看次数=10, 商品曝光人数=20,
+    商品点击人数=21, 成交人数=29, 评论次数=14, 新加直播团=15, 新增粉丝=16,
+    新加购物团=42。
     """
     try:
         from openpyxl import load_workbook
@@ -235,14 +237,24 @@ def fetch_funnel_from_excel():
             return None
         wb = load_workbook(files[-1], data_only=True, read_only=True)
         ws = wb["直播间明细"]
-        f = {"exposure": 0.0, "views": 0.0, "prod_exposure": 0.0, "prod_click": 0.0, "buyers": 0.0}
+        f = {
+            "exposure": 0.0, "views": 0.0, "prod_exposure": 0.0, "prod_click": 0.0, "buyers": 0.0,
+            "exposure_count": 0.0, "watch_count": 0.0, "comments": 0.0,
+            "new_live_group": 0.0, "new_fans": 0.0, "new_shopping_group": 0.0,
+        }
         for row in ws.iter_rows(min_row=2, values_only=True):
             if row and row[1] == "阴山优麦冲饮旗舰店":
                 f["exposure"] += float(row[6] or 0)
+                f["exposure_count"] += float(row[7] or 0)
                 f["views"] += float(row[8] or 0)
+                f["watch_count"] += float(row[10] or 0)
                 f["prod_exposure"] += float(row[20] or 0)
                 f["prod_click"] += float(row[21] or 0)
                 f["buyers"] += float(row[29] or 0)
+                f["comments"] += float(row[14] or 0)
+                f["new_live_group"] += float(row[15] or 0)
+                f["new_fans"] += float(row[16] or 0)
+                f["new_shopping_group"] += float(row[42] or 0)
         wb.close()
         if f["exposure"] <= 0:
             return None
@@ -258,6 +270,11 @@ def fetch_funnel_from_excel():
             "rate_click": rate(f["prod_click"], f["prod_exposure"]),      # 商品曝光-点击率
             "rate_buy": rate(f["buyers"], f["prod_click"]),              # 商品点击-成交转化率
             "rate_total": rate(f["buyers"], f["exposure"]),              # 曝光-成交转化率
+            "rate_watch_buy": rate(f["buyers"], f["watch_count"]),      # 看播转化率（按观看人次）
+            "interactions": round(f["comments"] + f["new_live_group"] + f["new_fans"] + f["new_shopping_group"], 2),
+            "rate_watch_view_times": rate(f["watch_count"], f["exposure_count"]),  # 曝光-观看率（按次数）
+            "rate_watch_interaction": rate(f["comments"] + f["new_live_group"] + f["new_fans"] + f["new_shopping_group"], f["watch_count"]),
+            "rate_exposure_interaction": rate(f["comments"] + f["new_live_group"] + f["new_fans"] + f["new_shopping_group"], f["exposure_count"]),
             "date": m.group(1) if m else "",
         }
     except Exception as e:
@@ -269,7 +286,7 @@ def rounded(v, d=2):
     return round(float(v) + 1e-9, d)
 
 def fetch_data():
-    rows = lark_read(TOKEN, "UUAtO2!A7:O38")
+    rows = lark_read(TOKEN, "UUAtO2!A2:O32")
     if rows is None:
         return None
 
