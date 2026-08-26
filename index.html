@@ -142,7 +142,7 @@ button{font:inherit}
 .funnel-rate .fr-val{font-size:16px;font-weight:800;color:#ffd04d}
 .funnel-rate .fr-name{font-size:11px;color:#9fc3ea;line-height:1.35;white-space:nowrap}
 @media(max-width:1250px){.funnel-wrap{grid-template-columns:1fr}.funnel-total{flex-direction:row;justify-content:flex-start;gap:10px;min-height:auto}.funnel-total .ft-name{max-width:none}}
-@media(max-width:1250px){#app{min-width:1024px}.metric-value{font-size:39px}.analytics-grid{grid-template-columns:1.6fr 1fr}.anchor-layout{grid-template-columns:1.45fr 1fr}.top-meta{gap:5px}.meta-chip{padding:7px 8px}.history-cards{grid-template-columns:repeat(2,1fr)}.anchor-hist-layout{grid-template-columns:1fr}}
+@media(max-width:1250px){#app{min-width:1024px}.metric-value{font-size:39px}.analytics-grid{grid-template-columns:1.6fr 1fr}.anchor-layout{grid-template-columns:1.45fr 1fr}.top-meta{gap:5px}.meta-chip{padding:7px 8px}.history-cards{grid-template-columns:repeat(2,1fr)}.anchor-hist-layout{grid-template-columns:1fr}.nav-btn{font-size:14px;gap:7px;padding:0 9px}.nav-btn i{font-size:17px}}
 </style>
 </head>
 <body>
@@ -165,7 +165,7 @@ button{font:inherit}
     <button class="nav-btn" :class="{active:view==='food_daily'}" @click="switchView('food_daily')"><i class="ri-store-2-line"></i>阴山优麦食品店日报</button>
     <button class="nav-btn" :class="{active:view==='food_history'}" @click="switchView('food_history')"><i class="ri-file-chart-line"></i>阴山优麦食品店历史数据查询</button>
   </nav>
-  <!-- ===== 主驾驶舱视图 ===== -->
+  <!-- ===== 冲饮旗舰店日报视图 ===== -->
   <div v-if="view==='chongyin_daily'">
   <section class="section">
     <div class="section-title">累计指标</div>
