@@ -731,34 +731,21 @@ def fetch_data():
     # 历史主播数据（全部日期块，供历史查询页使用）
     out["anchorHistory"] = fetch_anchor_history()
 
-    # 读取月度汇总数据 from specific cells
-    cmd2 = [LARK_CLI, "sheets", "+read", "--as", "bot",
-           "--spreadsheet-token", TOKEN,
-           "--range", "UUAtO2!J38:O38",
-           "--value-render-option", "UnformattedValue",
-           "--format", "json"]
-    try:
-        r2 = subprocess.run(cmd2, capture_output=True, text=True, timeout=15)
-        d2 = json.loads(r2.stdout)
-        if d2.get("ok") and "data" in d2 and "valueRange" in d2["data"]:
-            sr = d2["data"]["valueRange"]["values"][0]
-            out["postalMonthly"] = {
-                "gmv": pn(sr[0]) if len(sr) > 0 and sr[0] is not None else 0,
-                "spend": pn(sr[1]) if len(sr) > 1 and sr[1] is not None else 0,
-                "roi": pn(sr[2]) if len(sr) > 2 and sr[2] is not None else 0,
-            }
-            out["videoMonthly"] = {
-                "gmv": pn(sr[3]) if len(sr) > 3 and sr[3] is not None else 0,
-                "spend": pn(sr[4]) if len(sr) > 4 and sr[4] is not None else 0,
-                "roi": pn(sr[5]) if len(sr) > 5 and sr[5] is not None else 0,
-            }
-        else:
-            out["videoMonthly"] = {"gmv": 0, "spend": 0, "roi": 0}
-            out["postalMonthly"] = {"gmv": 0, "spend": 0, "roi": 0}
-    except Exception as e:
-        print(f"[warn] summary cells: {e}", file=sys.stderr)
-        out["videoMonthly"] = {"gmv": 0, "spend": 0, "roi": 0}
-        out["postalMonthly"] = {"gmv": 0, "spend": 0, "roi": 0}
+    # 月度汇总：从 UUAtO2 每日 J/K（低GI视频号）与 M/N（冲饮视频号）汇总并计算 ROI
+    low_gmv = sum(pn(r[9]) or 0 for r in rows if len(r) > 9)
+    low_spend = sum(pn(r[10]) or 0 for r in rows if len(r) > 10)
+    vid_gmv = sum(pn(r[12]) or 0 for r in rows if len(r) > 12)
+    vid_spend = sum(pn(r[13]) or 0 for r in rows if len(r) > 13)
+    out["postalMonthly"] = {
+        "gmv": rounded(low_gmv, 2),
+        "spend": rounded(low_spend, 2),
+        "roi": rounded(low_gmv / low_spend, 2) if low_spend else 0,
+    }
+    out["videoMonthly"] = {
+        "gmv": rounded(vid_gmv, 2),
+        "spend": rounded(vid_spend, 2),
+        "roi": rounded(vid_gmv / vid_spend, 2) if vid_spend else 0,
+    }
     out["targetGmv"] = 2800000
     out["targetRoi"] = 3
     # 漏斗数据：优先本地 Excel（最新日期）；CI 云端无 Excel 时保留上一版值
