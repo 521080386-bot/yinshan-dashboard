@@ -11,7 +11,7 @@
 漏斗数据（funnel）从本地最新「直播明细_全部账号_*.xlsx」提取；CI 云端无
 本地 Excel 时保留上一版值（不覆盖）。
 """
-import json, subprocess, sys, os, re, ast, glob
+import json, subprocess, sys, os, re, ast, glob, argparse
 from datetime import datetime, date
 
 LARK_CLI = os.environ.get("LARK_CLI", "/Users/apple/Documents/Codex/2026-06-03/cli/lark-cli")
@@ -19,16 +19,22 @@ TOKEN = os.environ.get("DASHBOARD_SHEET_TOKEN", "Jos6sfYSRh4eWXtZalBcoFetnCe")
 HANDOFF = os.environ.get("HANDOFF_SHEET_TOKEN", "shtcnwOdgFZCQAf4ZjiR5egkoTc")
 HANDOFF_SHEET = "KFTIUP"
 OUTPUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dashboard_data.json")
+FOOD_DAILY = os.environ.get("FOOD_DAILY_SHEET_TOKEN", "CD2psfSlghdutdt9wHmcOJaDntf")
+FOOD_SUMMARY_SHEET = "KYcREK"
+FOOD_ANCHOR_SHEET = "cdzpqi"
+FOOD_ANCHOR_LEGACY_SHEET = "sXKpGG"
+FOOD_SHOP_SHEET = "9VVamg"
+FOOD_LIVE_SHEET = "weIxvN"
 
-def lark_read(token, range_expr, value_render=None):
-    cmd = [LARK_CLI, "sheets", "+read", "--as", "bot",
+def lark_read(token, range_expr, value_render=None, identity="bot", timeout=15):
+    cmd = [LARK_CLI, "sheets", "+read", "--as", identity,
            "--spreadsheet-token", token,
            "--range", range_expr,
            "--format", "json"]
     if value_render:
         cmd += ["--value-render-option", value_render]
     try:
-        r = subprocess.run(cmd, capture_output=True, text=True, timeout=15)
+        r = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
         data = json.loads(r.stdout)
         if data.get("ok") and "data" in data and "valueRange" in data["data"]:
             return data["data"]["valueRange"]["values"]
@@ -222,25 +228,17 @@ def fetch_anchor_history():
     return history
 
 
-def fetch_funnel_from_excel():
-    """从本地最新「直播明细_全部账号_*.xlsx」提取阴山优麦冲饮旗舰店直播转化/互动数据。
-    返回 dict（曝光/观看/商品曝光/商品点击/成交人数 + 转化率 + 互动指标），无文件时返回 None。
-    列：曝光人数=6, 曝光次数=7, 观看人数=8, 观看次数=10, 商品曝光人数=20,
-    商品点击人数=21, 成交人数=29, 评论次数=14, 新加直播团=15, 新增粉丝=16,
-    新加购物团=42。
-    """
+def build_funnel_from_workbook(path):
+    """从指定直播明细 Excel 提取漏斗数据；无有效曝光时返回 None。"""
     try:
         from openpyxl import load_workbook
-        base_dir = os.path.dirname(os.path.abspath(__file__))
-        files = sorted(glob.glob(os.path.join(base_dir, "直播明细_全部账号_*.xlsx")))
-        if not files:
-            return None
-        wb = load_workbook(files[-1], data_only=True, read_only=True)
+        wb = load_workbook(path, data_only=True, read_only=True)
         ws = wb["直播间明细"]
         f = {
             "exposure": 0.0, "views": 0.0, "prod_exposure": 0.0, "prod_click": 0.0, "buyers": 0.0,
             "exposure_count": 0.0, "watch_count": 0.0, "comments": 0.0,
             "new_live_group": 0.0, "new_fans": 0.0, "new_shopping_group": 0.0,
+            "avg_stay_min": 0.0,
         }
         for row in ws.iter_rows(min_row=2, values_only=True):
             if row and row[1] == "阴山优麦冲饮旗舰店":
@@ -255,24 +253,24 @@ def fetch_funnel_from_excel():
                 f["new_live_group"] += float(row[15] or 0)
                 f["new_fans"] += float(row[16] or 0)
                 f["new_shopping_group"] += float(row[42] or 0)
+                f["avg_stay_min"] = max(f["avg_stay_min"], float(row[13] or 0))
         wb.close()
         if f["exposure"] <= 0:
             return None
         def rate(a, b):
             return round(a / b * 100, 2) if b else 0
-        # 文件名形如 直播明细_全部账号_20260820_20260820.xlsx，取中间 8 位日期
         import re as _re
-        m = _re.search(r"(\d{8})_", files[-1])
+        m = _re.search(r"(\d{8})_", path)
         return {
             **f,
-            "rate_view": rate(f["views"], f["exposure"]),          # 曝光-观看率
-            "rate_prod_exposure": rate(f["prod_exposure"], f["views"]),  # 观看-商品曝光率
-            "rate_click": rate(f["prod_click"], f["prod_exposure"]),      # 商品曝光-点击率
-            "rate_buy": rate(f["buyers"], f["prod_click"]),              # 商品点击-成交转化率
-            "rate_total": rate(f["buyers"], f["exposure"]),              # 曝光-成交转化率
-            "rate_watch_buy": rate(f["buyers"], f["watch_count"]),      # 看播转化率（按观看人次）
+            "rate_view": rate(f["views"], f["exposure"]),
+            "rate_prod_exposure": rate(f["prod_exposure"], f["views"]),
+            "rate_click": rate(f["prod_click"], f["prod_exposure"]),
+            "rate_buy": rate(f["buyers"], f["prod_click"]),
+            "rate_total": rate(f["buyers"], f["exposure"]),
+            "rate_watch_buy": rate(f["buyers"], f["watch_count"]),
             "interactions": round(f["comments"] + f["new_live_group"] + f["new_fans"] + f["new_shopping_group"], 2),
-            "rate_watch_view_times": rate(f["watch_count"], f["exposure_count"]),  # 曝光-观看率（按次数）
+            "rate_watch_view_times": rate(f["watch_count"], f["exposure_count"]),
             "rate_watch_interaction": rate(f["comments"] + f["new_live_group"] + f["new_fans"] + f["new_shopping_group"], f["watch_count"]),
             "rate_exposure_interaction": rate(f["comments"] + f["new_live_group"] + f["new_fans"] + f["new_shopping_group"], f["exposure_count"]),
             "date": m.group(1) if m else "",
@@ -282,8 +280,376 @@ def fetch_funnel_from_excel():
         return None
 
 
+def fetch_funnel_from_excel():
+    """取本地最新一份直播明细 Excel 的漏斗数据。"""
+    try:
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        files = sorted(glob.glob(os.path.join(base_dir, "直播明细_全部账号_*.xlsx")))
+        if not files:
+            return None
+        return build_funnel_from_workbook(files[-1])
+    except Exception as e:
+        print(f"[warn] funnel excel: {e}", file=sys.stderr)
+        return None
+
+
+def fetch_prev_funnel_from_excel():
+    """取本地倒数第二份直播明细 Excel 的昨日漏斗数据。"""
+    try:
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        files = sorted(glob.glob(os.path.join(base_dir, "直播明细_全部账号_*.xlsx")))
+        if len(files) < 2:
+            return None
+        return build_funnel_from_workbook(files[-2])
+    except Exception as e:
+        print(f"[warn] prev funnel excel: {e}", file=sys.stderr)
+        return None
+
+
+def parse_live_date(value):
+    """cC79qR 的开始时间可能是 Excel 序列号或 YYYY/M/D H:MM 字符串。"""
+    if value is None or value == "":
+        return None
+    if isinstance(value, (int, float)):
+        return serial_to_date(int(value)).isoformat()
+    s = str(value).strip()
+    m = re.search(r"(\d{4})/(\d{1,2})/(\d{1,2})", s)
+    if m:
+        y, mo, d = map(int, m.groups())
+        try:
+            return date(y, mo, d).isoformat()
+        except ValueError:
+            return None
+    return None
+
+def fetch_live_history():
+    """从 cC79qR 读取阴山优麦冲饮旗舰店每日直播明细，供历史漏斗按日期区间聚合。"""
+    values = lark_read(TOKEN, "cC79qR!A1:BB200")
+    if not values:
+        return []
+    records = []
+    for row in values[1:]:
+        if not row or len(row) < 44:
+            continue
+        if str(row[1] or "").strip() != "阴山优麦冲饮旗舰店":
+            continue
+        dstr = parse_live_date(row[3])
+        if not dstr:
+            continue
+        records.append({
+            "date": dstr,
+            "exposure": pn(row[6]) or 0,
+            "exposure_count": pn(row[7]) or 0,
+            "views": pn(row[8]) or 0,
+            "watch_count": pn(row[10]) or 0,
+            "avg_stay_min": pn(row[13]) or 0,
+            "comments": pn(row[14]) or 0,
+            "new_live_group": pn(row[15]) or 0,
+            "new_fans": pn(row[16]) or 0,
+            "prod_exposure": pn(row[20]) or 0,
+            "prod_click": pn(row[21]) or 0,
+            "gmv": pn(row[25]) or 0,
+            "hourly_gmv": pn(row[27]) or 0,
+            "buyers": pn(row[29]) or 0,
+            "refund_amount": pn(row[31]) or 0,
+            "new_shopping_group": pn(row[42]) or 0,
+            "cost": pn(row[43]) or 0,
+        })
+    records.sort(key=lambda r: r["date"])
+    return records
+
 def rounded(v, d=2):
     return round(float(v) + 1e-9, d)
+
+def default_food():
+    return {
+        "knownDays": [],
+        "latest": {"day": 0, "b": None, "c": None, "d": None, "e": None, "f": None, "g": None, "h": None, "date": None},
+        "targetGmv": 840000,
+        "targetGsv": 720000,
+        "monthly": {"gmv": 0, "spend": 0, "gsv": 0, "duration": 0, "roi": 0},
+        "funnel": None,
+        "funnelPrev": None,
+        "liveHistory": [],
+        "anchors": [],
+        "anchorHistory": [],
+    }
+
+def fetch_food_known_days():
+    """从 9VVamg 读取食品店 1-8 月逐日成交数据。"""
+    values = lark_read(TOKEN, f"{FOOD_SHOP_SHEET}!A2:I245", identity="user", timeout=30)
+    if not values:
+        return []
+    out = []
+    for row in values:
+        if not row:
+            continue
+        serial = pn(row[0])
+        dv = pn(row[1]) if len(row) > 1 else None
+        if serial is None or serial <= 40000 or dv is None:
+            continue
+        d = serial_to_date(int(serial))
+        out.append({
+            "date": d.isoformat(),
+            "day": d.day,
+            "dv": dv,
+            "sp": pn(row[2]) if len(row) > 2 else None,
+            "duration": None,
+            "gsv": None,
+            "hourly": None,
+            "roi": pn(row[8]) if len(row) > 8 else None,
+            "live": pn(row[3]) if len(row) > 3 else 0,
+            "short_video": pn(row[4]) if len(row) > 4 else 0,
+            "card": pn(row[5]) if len(row) > 5 else 0,
+            "other": pn(row[6]) if len(row) > 6 else 0,
+            "graphic": pn(row[7]) if len(row) > 7 else 0,
+        })
+    return out
+
+def fetch_food_summary():
+    """从 KYcREK 读取食品店每日消耗/时长/GSV 与目标。"""
+    values = lark_read(FOOD_DAILY, f"{FOOD_SUMMARY_SHEET}!A1:J45", value_render="FormattedValue", identity="user", timeout=30)
+    if not values:
+        return {}, {}
+    summary = {}
+    for row in values[3:34]:
+        if len(row) < 10:
+            continue
+        ds = str(row[1] or "").strip()
+        m = re.match(r"(\d+)月(\d+)日", ds)
+        if not m:
+            continue
+        date_str = f"2026-{int(m.group(1)):02d}-{int(m.group(2)):02d}"
+        summary[date_str] = {
+            "sp": pn(row[5]),
+            "duration": pn(row[3]),
+            "hourly": pn(row[4]),
+            "gsv": pn(row[8]),
+            "roi": pn(row[9]),
+        }
+    targets = {}
+    if len(values) > 36:
+        targets["targetGmv"] = pn(values[36][2]) if len(values[36]) > 2 else None
+        targets["targetGsv"] = pn(values[36][8]) if len(values[36]) > 8 else None
+        targets["gapGmv"] = pn(values[37][2]) if len(values) > 37 and len(values[37]) > 2 else None
+        targets["gapGsv"] = pn(values[37][8]) if len(values) > 37 and len(values[37]) > 8 else None
+    return summary, targets
+
+def fetch_food_live_history():
+    """从 weIxvN 读取阴山优麦食品旗舰店直播明细。"""
+    values = lark_read(TOKEN, f"{FOOD_LIVE_SHEET}!A2:BB199", identity="user", timeout=30)
+    if not values:
+        return []
+    records = []
+    for row in values:
+        if not row or len(row) < 44:
+            continue
+        if str(row[1] or "").strip() != "阴山优麦食品旗舰店":
+            continue
+        dstr = parse_live_date(row[3])
+        if not dstr:
+            continue
+        records.append({
+            "date": dstr,
+            "duration": pn(row[5]) / 60 if pn(row[5]) else 0,
+            "exposure": pn(row[6]) or 0,
+            "exposure_count": pn(row[7]) or 0,
+            "views": pn(row[8]) or 0,
+            "watch_count": pn(row[10]) or 0,
+            "avg_stay_min": pn(row[13]) or 0,
+            "comments": pn(row[14]) or 0,
+            "new_live_group": pn(row[15]) or 0,
+            "new_fans": pn(row[16]) or 0,
+            "prod_exposure": pn(row[20]) or 0,
+            "prod_click": pn(row[21]) or 0,
+            "gmv": pn(row[25]) or 0,
+            "hourly_gmv": pn(row[27]) or 0,
+            "buyers": pn(row[29]) or 0,
+            "refund_amount": pn(row[31]) or 0,
+            "new_shopping_group": pn(row[42]) or 0,
+            "cost": pn(row[43]) or 0,
+        })
+    records.sort(key=lambda r: r["date"])
+    return records
+
+def build_food_funnel(records):
+    if not records:
+        return None
+    s = {
+        "exposure": 0.0, "exposure_count": 0.0, "views": 0.0, "watch_count": 0.0,
+        "prod_exposure": 0.0, "prod_click": 0.0, "buyers": 0.0, "comments": 0.0,
+        "new_live_group": 0.0, "new_fans": 0.0, "new_shopping_group": 0.0, "avg_stay_min": 0.0,
+    }
+    for r in records:
+        for k in s:
+            s[k] += float(r.get(k) or 0)
+    if s["exposure"] <= 0:
+        return None
+    def rate(a, b):
+        return round(a / b * 100, 2) if b else 0
+    return {
+        **s,
+        "rate_view": rate(s["views"], s["exposure"]),
+        "rate_prod_exposure": rate(s["prod_exposure"], s["views"]),
+        "rate_click": rate(s["prod_click"], s["prod_exposure"]),
+        "rate_buy": rate(s["buyers"], s["prod_click"]),
+        "rate_total": rate(s["buyers"], s["exposure"]),
+        "rate_watch_buy": rate(s["buyers"], s["watch_count"]),
+        "interactions": round(s["comments"] + s["new_live_group"] + s["new_fans"] + s["new_shopping_group"], 2),
+        "rate_watch_view_times": rate(s["watch_count"], s["exposure_count"]),
+        "rate_watch_interaction": rate(s["comments"] + s["new_live_group"] + s["new_fans"] + s["new_shopping_group"], s["watch_count"]),
+        "rate_exposure_interaction": rate(s["comments"] + s["new_live_group"] + s["new_fans"] + s["new_shopping_group"], s["exposure_count"]),
+        "date": records[0]["date"].replace("-", ""),
+    }
+
+def parse_food_anchor_name(header):
+    m = re.search(r"主播\s*\n+\s*([^\n]+)", str(header or ""))
+    if m:
+        return m.group(1).strip()
+    text = str(header or "").replace("主播", "").strip()
+    return text.splitlines()[0].strip() if text.splitlines() else ""
+
+def fetch_food_anchor_blocks_cdzpqi():
+    """从 cdzpqi 交班数据读取食品店主播班次块（优先）。"""
+    values = lark_read(FOOD_DAILY, f"{FOOD_ANCHOR_SHEET}!A1:I500", identity="user", timeout=30)
+    if not values:
+        return {}
+    blocks = {}
+    i, n = 0, len(values)
+    while i < n:
+        row = values[i]
+        serial = pn(row[0]) if row else None
+        if serial is None or serial <= 40000:
+            i += 1
+            continue
+        anchors = []
+        if i + 4 < n:
+            for idx in (2, 4, 6, 8):
+                name = str(values[i][idx]).strip() if len(values[i]) > idx and values[i][idx] else ''
+                gmv = pn(values[i + 2][idx]) if len(values[i + 2]) > idx else 0
+                cost = pn(values[i + 3][idx]) if len(values[i + 3]) > idx else 0
+                hours = pn(values[i + 1][idx]) if len(values[i + 1]) > idx else 0
+                if not name:
+                    continue
+                if gmv or cost:
+                    anchors.append({
+                        "name": name,
+                        "gmv": rounded(gmv or 0),
+                        "spend": rounded(cost or 0),
+                        "roi": rounded((gmv or 0) / cost, 2) if cost else 0,
+                        "hours": rounded(hours or 0, 2),
+                    })
+        if anchors:
+            blocks[int(serial)] = anchors
+        i += 5
+    return blocks
+
+
+def fetch_food_anchor_blocks_legacy():
+    """从 sXKpGG 读取食品店主播班次块（历史数据）。"""
+    values = lark_read(FOOD_DAILY, f"{FOOD_ANCHOR_LEGACY_SHEET}!A1:G3181", identity="user", timeout=60)
+    if not values:
+        return {}
+    blocks = {}
+    i, n = 0, len(values)
+    while i < n:
+        row = values[i]
+        serial = pn(row[0]) if row else None
+        if serial is None or serial <= 40000:
+            i += 1
+            continue
+        anchors = []
+        j = i + 1
+        while j < n:
+            rowj = values[j]
+            a0 = rowj[0] if rowj else None
+            a0n = pn(a0)
+            if a0 is not None and a0n is not None and a0n > 40000:
+                break
+            header = str(a0 or "")
+            if "主播" not in header or "核心指标" in header:
+                j += 1
+                continue
+            name = parse_food_anchor_name(header)
+            gmv = pn(values[j + 1][4]) if j + 1 < n and len(values[j + 1]) > 4 else 0
+            roi = pn(values[j + 2][4]) if j + 2 < n and len(values[j + 2]) > 4 else 0
+            cost = pn(values[j + 5][3]) if j + 5 < n and len(values[j + 5]) > 3 else 0
+            if name and (gmv or cost):
+                anchors.append({
+                    "name": name,
+                    "gmv": rounded(gmv or 0),
+                    "spend": rounded(cost or 0),
+                    "roi": rounded(roi) if roi else (rounded((gmv or 0) / cost, 2) if cost else 0),
+                    "hours": 0,
+                })
+            j += 6
+        if anchors:
+            blocks[int(serial)] = anchors
+        i = j if j > i else i + 1
+    return blocks
+
+def fetch_food_anchor_history(blocks):
+    return [{"serial": s, "date": serial_to_date(s).isoformat(), "anchors": blocks[s]} for s in sorted(blocks)]
+
+def fetch_food_data():
+    known = fetch_food_known_days()
+    summary, targets = fetch_food_summary()
+    by_date = {d["date"]: d for d in known}
+    for ds, sm in summary.items():
+        if ds in by_date:
+            for k, v in sm.items():
+                if by_date[ds].get(k) is None and v is not None:
+                    by_date[ds][k] = v
+    known = sorted(by_date.values(), key=lambda d: d["date"])
+    live = fetch_food_live_history()
+    blocks = fetch_food_anchor_blocks_cdzpqi()
+    for serial, anchors in fetch_food_anchor_blocks_legacy().items():
+        blocks.setdefault(serial, anchors)
+    live_duration = {}
+    for r in live:
+        live_duration[r["date"]] = live_duration.get(r["date"], 0.0) + float(r.get("duration") or 0)
+    for ds, d in by_date.items():
+        if d.get("duration") is None and ds in live_duration:
+            d["duration"] = round(live_duration[ds], 2)
+        if d.get("hourly") is None and d.get("duration"):
+            d["hourly"] = round((d.get("dv") or 0) / d["duration"], 2)
+    latest = known[-1] if known else None
+    latest_serial = excel_serial(date.fromisoformat(latest["date"])) if latest else None
+    anchors = blocks.get(latest_serial, []) if latest_serial else []
+    funnel = funnel_prev = None
+    if live:
+        dates = sorted(set(r["date"] for r in live))
+        if dates:
+            funnel = build_food_funnel([r for r in live if r["date"] == dates[-1]])
+            if len(dates) > 1:
+                funnel_prev = build_food_funnel([r for r in live if r["date"] == dates[-2]])
+    aug = [d for d in known if d["date"].startswith("2026-08")]
+    monthly = {
+        "gmv": rounded(sum(d["dv"] for d in aug), 2),
+        "spend": rounded(sum(d["sp"] or 0 for d in aug), 2),
+        "gsv": rounded(sum(d["gsv"] or 0 for d in aug), 2),
+        "duration": rounded(sum(d["duration"] or 0 for d in aug), 2),
+        "roi": rounded(sum(d["dv"] for d in aug) / sum(d["sp"] or 0 for d in aug), 2) if sum(d["sp"] or 0 for d in aug) else 0,
+    }
+    latest_obj = {
+        "date": latest["date"], "day": latest["day"], "b": latest["dv"], "c": latest["sp"],
+        "d": latest["live"], "e": latest["short_video"], "f": latest["card"], "g": latest["other"], "h": latest["graphic"],
+        "duration": latest["duration"], "hourly": latest["hourly"], "gsv": latest["gsv"], "roi": latest["roi"],
+    } if latest else default_food()["latest"]
+    return {
+        "knownDays": known,
+        "latest": latest_obj,
+        "targetGmv": targets.get("targetGmv") or 840000,
+        "targetGsv": targets.get("targetGsv") or 720000,
+        "gapGmv": targets.get("gapGmv"),
+        "gapGsv": targets.get("gapGsv"),
+        "monthly": monthly,
+        "funnel": funnel,
+        "funnelPrev": funnel_prev,
+        "liveHistory": live,
+        "anchors": anchors,
+        "anchorHistory": fetch_food_anchor_history(blocks),
+    }
 
 def fetch_data():
     rows = lark_read(TOKEN, "UUAtO2!A2:O32")
@@ -397,24 +763,73 @@ def fetch_data():
     out["targetRoi"] = 3
     # 漏斗数据：优先本地 Excel（最新日期）；CI 云端无 Excel 时保留上一版值
     funnel = fetch_funnel_from_excel()
+    funnel_prev = fetch_prev_funnel_from_excel()
     if funnel is not None:
         out["funnel"] = funnel
+        if funnel_prev is not None:
+            out["funnelPrev"] = funnel_prev
     elif os.path.exists(OUTPUT):
         try:
             prev = json.load(open(OUTPUT, encoding="utf-8"))
             if prev.get("funnel"):
                 out["funnel"] = prev["funnel"]
+            if prev.get("funnelPrev"):
+                out["funnelPrev"] = prev["funnelPrev"]
         except Exception:
             pass
     if "funnel" not in out:
         out["funnel"] = None
+    if "funnelPrev" not in out:
+        out["funnelPrev"] = None
+    # 历史直播明细（cC79qR），供历史查询页按日期区间聚合
+    live_history = fetch_live_history()
+    if live_history:
+        out["liveHistory"] = live_history
+    elif os.path.exists(OUTPUT):
+        try:
+            prev = json.load(open(OUTPUT, encoding="utf-8"))
+            out["liveHistory"] = prev.get("liveHistory", [])
+        except Exception:
+            out["liveHistory"] = []
+    else:
+        out["liveHistory"] = []
     out["fetchedAt"] = subprocess.run(
         ["date", "+%Y-%m-%d %H:%M:%S"], capture_output=True, text=True
     ).stdout.strip()
+    try:
+        food = fetch_food_data()
+    except Exception as e:
+        print(f"[warn] food data: {e}", file=sys.stderr)
+        food = None
+    if food and (food.get("knownDays") or food.get("liveHistory") or food.get("anchorHistory")):
+        out["food"] = food
+    elif os.path.exists(OUTPUT):
+        try:
+            out["food"] = json.load(open(OUTPUT, encoding="utf-8")).get("food") or default_food()
+        except Exception:
+            out["food"] = default_food()
+    else:
+        out["food"] = default_food()
 
     return out
 
+def deploy_dashboard():
+    """提交并推送 dashboard_data.json，GitHub Pages 会随之更新。"""
+    base = os.path.dirname(os.path.abspath(__file__))
+    subprocess.run(["git", "-C", base, "add", "dashboard_data.json"], check=True)
+    r = subprocess.run(["git", "-C", base, "diff", "--cached", "--quiet"], capture_output=True)
+    if r.returncode == 0:
+        print("[dashboard_data_updater] No dashboard data changes, skip push")
+        return
+    stamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    subprocess.run(["git", "-C", base, "commit", "-m", f"chore: refresh dashboard data [{stamp}]"], check=True)
+    subprocess.run(["git", "-C", base, "push"], check=True)
+    print("[dashboard_data_updater] Pushed dashboard_data.json to origin/main")
+
 def main():
+    parser = argparse.ArgumentParser(description="Refresh dashboard data")
+    parser.add_argument("--deploy", action="store_true", help="Commit and push dashboard_data.json to update GitHub Pages")
+    args = parser.parse_args()
     print("[dashboard_data_updater] Fetching data from Feishu (UUAtO2 + KFTIUP)...")
     data = fetch_data()
     if data is None:
@@ -429,6 +844,11 @@ def main():
     print(f"[dashboard_data_updater] Anchors: {len(anc)} hosts")
     for a in anc:
         print(f"  {a['name']}: GMV {a['gmv']}, Cost {a['spend']}, ROI {a['roi']}")
+    food = data.get("food") or {}
+    fd = food.get("latest") or {}
+    print(f"[dashboard_data_updater] Food latest: {fd.get('date')}, GMV: {fd.get('b')}, days: {len(food.get('knownDays') or [])}")
+    if args.deploy:
+        deploy_dashboard()
 
 if __name__ == "__main__":
     main()
