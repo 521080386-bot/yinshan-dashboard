@@ -56,6 +56,16 @@ def pn(v):
     except:
         return None
 
+def pn_expr(v):
+    """Parse numbers or simple arithmetic expressions like '15874-9088'."""
+    n = pn(v)
+    if n is not None:
+        return n
+    if isinstance(v, str) and re.fullmatch(r"[0-9+\-*/(). ]+", v.strip()):
+        val = eval_formula(v, {})
+        return val or None
+    return None
+
 def col_num(index):
     """0-based column index to letter(s)."""
     result = ""
@@ -529,6 +539,9 @@ def fetch_food_anchor_blocks_cdzpqi():
                 gmv = pn(values[i + 2][idx]) if len(values[i + 2]) > idx else 0
                 cost = pn(values[i + 3][idx]) if len(values[i + 3]) > idx else 0
                 hours = pn(values[i + 1][idx]) if len(values[i + 1]) > idx else 0
+                gmv = pn_expr(values[i + 2][idx]) if len(values[i + 2]) > idx else 0
+                cost = pn_expr(values[i + 3][idx]) if len(values[i + 3]) > idx else 0
+                hours = pn_expr(values[i + 1][idx]) if len(values[i + 1]) > idx else 0
                 if not name:
                     continue
                 if gmv or cost:
