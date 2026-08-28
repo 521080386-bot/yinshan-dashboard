@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>阴山优麦 · 智能矩阵驾驶舱</title>
 <link rel="icon" href="data:,">
+<script>
+try{if(localStorage.getItem('ysym2026_auth')==='1'){document.documentElement.classList.add('auth-ok')}}catch(e){}
+</script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.6.0/fonts/remixicon.css">
 <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
 <script src="https://unpkg.com/echarts"></script>
@@ -21,6 +24,18 @@ html,body{margin:0;min-height:100%;background:var(--bg)}
 body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;color:var(--text);font-variant-numeric:tabular-nums}
 button{font:inherit}
 #app{min-width:1120px;max-width:1540px;margin:0 auto;padding:10px 12px 76px;background:radial-gradient(circle at 50% -10%,rgba(27,93,178,.18),transparent 34%),linear-gradient(180deg,#020d22,#020b1a 68%,#020814);min-height:100vh}
+#login-page{position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px;background:radial-gradient(circle at 50% 18%,rgba(19,104,190,.28),transparent 36%),linear-gradient(180deg,#020d22,#020814 80%)}
+html.auth-ok #login-page{display:none}
+body.locked #app{filter:blur(7px);pointer-events:none;user-select:none}
+.login-card{width:min(92vw,400px);padding:34px 30px 30px;text-align:center;border:1px solid rgba(19,112,194,.78);border-radius:8px;background:linear-gradient(180deg,#081d38,#051529);box-shadow:inset 0 0 0 2px rgba(3,49,93,.7),inset 0 0 28px rgba(17,91,164,.12),0 0 26px rgba(0,120,255,.16)}
+.login-mark{width:64px;height:64px;margin:0 auto 18px;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:30px;color:#7ed0ff;border:2px solid #148bd6;background:radial-gradient(circle,#0c4c82,#072445 72%);box-shadow:0 0 18px rgba(0,164,255,.45)}
+.login-title{font-size:23px;font-weight:800;color:#f2f8ff;letter-spacing:.02em}
+.login-sub{margin:9px 0 24px;font-size:14px;color:#a9c3e2;font-weight:600}
+.login-card input{width:100%;height:48px;padding:0 14px;border:1px solid #1e6fbb;border-radius:8px;background:#020d22;color:#fff;font-size:16px;outline:none;transition:border-color .15s}
+.login-card input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(18,201,232,.14)}
+#login-btn{width:100%;height:48px;margin-top:16px;border:0;border-radius:8px;background:linear-gradient(135deg,#0755b0,#087bd4);color:#fff;font-size:17px;font-weight:800;cursor:pointer;box-shadow:0 0 16px rgba(0,130,255,.3)}
+#login-btn:hover{filter:brightness(1.12)}#login-btn:focus-visible{outline:2px solid #fff;outline-offset:3px}
+.login-error{min-height:22px;margin-top:13px;font-size:13px;color:#ff6b6e;font-weight:700}
 .loading{position:fixed;inset:0;z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(2,12,30,.96);color:#d8e9ff;gap:16px}
 .spinner{width:42px;height:42px;border-radius:50%;border:3px solid rgba(77,145,255,.22);border-top-color:var(--cyan);animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -172,7 +187,50 @@ button{font:inherit}
 </style>
 </head>
 <body>
+<div id="login-page">
+  <div class="login-card">
+    <div class="login-mark"><i class="ri-lock-2-line"></i></div>
+    <div class="login-title">阴山优麦 · 智能矩阵驾驶舱</div>
+    <div class="login-sub">请输入访问密码后进入</div>
+    <input id="login-password" type="password" placeholder="访问密码" autocomplete="current-password" aria-label="访问密码">
+    <button id="login-btn" type="button">登 录</button>
+    <div id="login-error" class="login-error" role="alert"></div>
+  </div>
+</div>
 <div id="app">
+<script>
+(function(){
+  const KEY='ysym2026_auth';
+  const PASS='ysym2026';
+  const hasAuth=function(){try{return localStorage.getItem(KEY)==='1'}catch(e){return false}};
+  const saveAuth=function(){try{localStorage.setItem(KEY,'1')}catch(e){}};
+  const login=document.getElementById('login-page');
+  const input=document.getElementById('login-password');
+  const btn=document.getElementById('login-btn');
+  const err=document.getElementById('login-error');
+  const submit=function(){
+    if((input.value||'').trim()===PASS){
+      saveAuth();
+      document.documentElement.classList.add('auth-ok');
+      document.body.classList.remove('locked');
+      input.value='';
+      err.textContent='';
+    }else{
+      err.textContent='密码错误，请重新输入';
+      input.select();
+      input.focus();
+    }
+  };
+  if(hasAuth()){
+    document.documentElement.classList.add('auth-ok');
+  }else{
+    document.body.classList.add('locked');
+    input.focus();
+  }
+  btn.addEventListener('click',submit);
+  input.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();submit();}});
+})();
+</script>
   <div v-if="loading" class="loading"><div class="spinner"></div><div>加载数据中…</div></div>
 
   <header class="topbar">
