@@ -19,6 +19,7 @@ TOKEN = os.environ.get("DASHBOARD_SHEET_TOKEN", "Jos6sfYSRh4eWXtZalBcoFetnCe")
 HANDOFF = os.environ.get("HANDOFF_SHEET_TOKEN", "shtcnwOdgFZCQAf4ZjiR5egkoTc")
 HANDOFF_SHEET = "KFTIUP"
 OUTPUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dashboard_data.json")
+JS_OUTPUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dashboard_data.js")
 FOOD_DAILY = os.environ.get("FOOD_DAILY_SHEET_TOKEN", "CD2psfSlghdutdt9wHmcOJaDntf")
 FOOD_SUMMARY_SHEET = "KYcREK"
 FOOD_ANCHOR_SHEET = "cdzpqi"
@@ -56,13 +57,13 @@ def pn(v):
     except:
         return None
 
-def pn_expr(v):
-    """Parse numbers or simple arithmetic expressions like '15874-9088'."""
+def pn_expr(v, cells=None):
+    """Parse numbers or arithmetic expressions with optional cell references."""
     n = pn(v)
     if n is not None:
         return n
-    if isinstance(v, str) and re.fullmatch(r"[0-9+\-*/(). ]+", v.strip()):
-        val = eval_formula(v, {})
+    if isinstance(v, str) and re.fullmatch(r"[0-9A-Z+\-*/(). ]+", v.strip()):
+        val = eval_formula(v, cells or {})
         return val or None
     return None
 
@@ -524,6 +525,11 @@ def fetch_food_anchor_blocks_cdzpqi():
     values = lark_read(FOOD_DAILY, f"{FOOD_ANCHOR_SHEET}!A1:I500", identity="user", timeout=30)
     if not values:
         return {}
+    cells = {}
+    for row_index, row in enumerate(values, start=1):
+        for col_index, value in enumerate(row):
+            cells[f"{col_num(col_index)}{row_index}"] = value
+
     blocks = {}
     i, n = 0, len(values)
     while i < n:
@@ -536,12 +542,9 @@ def fetch_food_anchor_blocks_cdzpqi():
         if i + 4 < n:
             for idx in (2, 4, 6, 8):
                 name = str(values[i][idx]).strip() if len(values[i]) > idx and values[i][idx] else ''
-                gmv = pn(values[i + 2][idx]) if len(values[i + 2]) > idx else 0
-                cost = pn(values[i + 3][idx]) if len(values[i + 3]) > idx else 0
-                hours = pn(values[i + 1][idx]) if len(values[i + 1]) > idx else 0
-                gmv = pn_expr(values[i + 2][idx]) if len(values[i + 2]) > idx else 0
-                cost = pn_expr(values[i + 3][idx]) if len(values[i + 3]) > idx else 0
-                hours = pn_expr(values[i + 1][idx]) if len(values[i + 1]) > idx else 0
+                gmv = pn_expr(values[i + 2][idx], cells) if len(values[i + 2]) > idx else 0
+                cost = pn_expr(values[i + 3][idx], cells) if len(values[i + 3]) > idx else 0
+                hours = pn_expr(values[i + 1][idx], cells) if len(values[i + 1]) > idx else 0
                 if not name:
                     continue
                 if gmv or cost:
@@ -837,6 +840,10 @@ def main():
         sys.exit(1)
     with open(OUTPUT, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
+    with open(JS_OUTPUT, "w", encoding="utf-8") as f:
+        f.write("window.__DASHBOARD_DATA__=")
+        json.dump(data, f, ensure_ascii=False, separators=(",", ":"))
+        f.write(";")
     print(f"[dashboard_data_updater] Written {OUTPUT}")
     ld = data.get("latest", {})
     anc = data.get("anchors", [])
