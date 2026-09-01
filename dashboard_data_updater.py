@@ -126,6 +126,20 @@ def serial_to_date(serial):
     return date(1899, 12, 30) + __import__("datetime").timedelta(days=int(serial))
 
 
+def parse_date_cell(value):
+    """Feishu date cell -> YYYY-MM-DD. Numeric cells are Excel serial numbers."""
+    n = pn(value)
+    if n is not None and 40000 < n < 80000:
+        return serial_to_date(int(n)).isoformat()
+    text = str(value or "").strip()
+    for fmt in ("%Y/%m/%d", "%Y-%m-%d"):
+        try:
+            return datetime.strptime(text, fmt).date().isoformat()
+        except ValueError:
+            pass
+    return None
+
+
 def parse_anchor_block(values, start_idx):
     """Parse one 5-row anchor block starting at start_idx. Returns list of anchors."""
     anchors = []
@@ -683,7 +697,9 @@ def fetch_data():
         sp = pn(row[2]) if len(row) > 2 else None
         if dv is not None:
             day_num = i + 1
+            business_date = parse_date_cell(row[0]) if row else None
             known.append({
+                "date": business_date,
                 "day": day_num,
                 "dv": dv,
                 "sp": sp or 0,
@@ -707,6 +723,7 @@ def fetch_data():
     if latest_idx is not None:
         row = rows[latest_idx]
         out["latest"] = {
+            "date": parse_date_cell(row[0]) if row else None,
             "day": latest_idx + 1,
             "b": pn(row[1]) if len(row) > 1 else None,
             "c": pn(row[2]) if len(row) > 2 else None,
