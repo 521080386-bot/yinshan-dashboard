@@ -468,8 +468,8 @@
   },
   "postal": {
     "gmv": 0,
-    "spend": 0,
-    "roi": 0
+    "spend": 32.83,
+    "roi": 0.0
   },
   "video": {
     "gmv": 1478.5,
@@ -6324,8 +6324,8 @@
   ],
   "postalMonthly": {
     "gmv": 0.0,
-    "spend": 0.0,
-    "roi": 0
+    "spend": 32.83,
+    "roi": 0.0
   },
   "videoMonthly": {
     "gmv": 1478.5,
@@ -7678,7 +7678,7 @@
       "cost": 32589.3
     }
   ],
-  "fetchedAt": "2026-09-02 09:53:40",
+  "fetchedAt": "2026-09-02 10:13:51",
   "food": {
     "knownDays": [
       {
@@ -15067,6 +15067,13 @@
         "spend": 4086.0,
         "roi": 1.9,
         "hours": 4.5
+      },
+      {
+        "name": "陶涛",
+        "gmv": 4479.84,
+        "spend": 2038.94,
+        "roi": 2.2,
+        "hours": 4.5
       }
     ],
     "anchorHistory": [
@@ -17726,6 +17733,13 @@
             "gmv": 7770.0,
             "spend": 4086.0,
             "roi": 1.9,
+            "hours": 4.5
+          },
+          {
+            "name": "陶涛",
+            "gmv": 4479.84,
+            "spend": 2038.94,
+            "roi": 2.2,
             "hours": 4.5
           }
         ]

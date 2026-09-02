@@ -541,6 +541,11 @@ def fetch_food_anchor_blocks_cdzpqi():
     if not values:
         return {}
     cells = {}
+    def to_serial(v):
+        parsed_date = parse_date_cell(v)
+        if parsed_date:
+            return excel_serial(datetime.strptime(parsed_date, "%Y-%m-%d").date())
+        return pn(v)
     for row_index, row in enumerate(values, start=1):
         for col_index, value in enumerate(row):
             cells[f"{col_num(col_index)}{row_index}"] = value
@@ -549,7 +554,7 @@ def fetch_food_anchor_blocks_cdzpqi():
     i, n = 0, len(values)
     while i < n:
         row = values[i]
-        serial = pn(row[0]) if row else None
+        serial = to_serial(row[0]) if row else None
         if serial is None or serial <= 40000:
             i += 1
             continue
