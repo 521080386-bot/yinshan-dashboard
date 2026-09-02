@@ -504,7 +504,7 @@ createApp({setup(){
   const gmvChartRef=ref(null),anchorChartRef=ref(null),knownDays=ref([]),latestData=ref(null)
   const trendRange=ref('thisMonth')
   const sortedAnchors=ref([]),videoData=ref({gmv:0,spend:0,roi:0}),postalData=ref({gmv:0,spend:0,roi:0}),videoMonthly=ref({gmv:0,spend:0,roi:0}),postalMonthly=ref({gmv:0,spend:0,roi:0})
-  const dailyTx=ref(0),dailySpend=ref(0),dailyRoi=ref('--'),updateDate=ref('2026-07-21'),targetGmv=ref(2800000)
+  const dailyTx=ref(0),dailySpend=ref(0),dailyRoi=ref('--'),updateDate=ref('2026-07-21'),targetGmv=ref(3200000)
   // ===== 历史查询状态 =====
   const view=ref((()=>{const q=new URLSearchParams(location.search).get('view');const h=location.hash.replace('#','');return ['chongyin_daily','chongyin_history','food_daily','food_history'].includes(q||h)?(q||h):'chongyin_daily'})()),anchorHistory=ref([])
   const trendChartRef=ref(null),anchorHistChartRef=ref(null),histLayerChartRef=ref(null),histWatchRateChartRef=ref(null)
@@ -953,7 +953,7 @@ createApp({setup(){
   function switchView(v){view.value=v;nextTick(()=>{if(v==='chongyin_daily'||v==='food_daily'){initHistRange();initCharts();resizeCharts()}else if(v==='chongyin_history'||v==='food_history'){initHistRange();renderTrend();renderAnchorHist();renderHistLayer();renderHistWatchRate()}})}
   function selectCard(key){selectedCard.value=key;nextTick(renderTrend)}
   const foodMonthly=computed(()=>foodData.value?.monthly||{gmv:0,spend:0,gsv:0,duration:0,roi:0})
-  const foodTargets=computed(()=>({targetGmv:foodData.value?.targetGmv||840000,targetGsv:foodData.value?.targetGsv||720000,gapGmv:foodData.value?.gapGmv,gapGsv:foodData.value?.gapGsv}))
+  const foodTargets=computed(()=>({targetGmv:foodData.value?.targetGmv||880000,targetGsv:foodData.value?.targetGsv||720000,gapGmv:foodData.value?.gapGmv,gapGsv:foodData.value?.gapGsv}))
   const foodGapGmv=computed(()=>foodTargets.value.targetGmv-cumulativeTx.value)
   const foodGapGsv=computed(()=>foodTargets.value.targetGsv-foodMonthly.value.gsv)
   const foodRemainGmv=computed(()=>Math.max(0,foodGapGmv.value)/Math.max(1,remainingDays.value))

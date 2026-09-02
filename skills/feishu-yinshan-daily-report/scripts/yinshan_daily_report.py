@@ -20,7 +20,7 @@ REPORT = "Jos6sfYSRh4eWXtZalBcoFetnCe"
 SCHEDULE = "WRHcsP1gYhSBhrtqNlvcnmPwnBh"
 HANDOFF = "shtcnwOdgFZCQAf4ZjiR5egkoTc"
 MONTHLY = "shtcnzv0loZQg1qk25PcCVonplW"
-MONTHLY_SHEET = "zsta38"  # 2026-8 月度大表
+MONTHLY_SHEET = "YKWQjE"  # 2026-9 月度大表
 LIVE_DATA = "shtcniNUd2HqPd8ZvZOt8btOScf"
 LIVE_SHEET = "bea4e1"
 LIVE_ACCOUNT = "阴山优麦冲饮旗舰店"
@@ -28,6 +28,9 @@ FOOD_SHOP_SHEET = "9VVamg"
 FOOD_ACCOUNT = "阴山优麦食品旗舰店"
 DRINK_LIVE_DETAIL_SHEET = "cC79qR"
 FOOD_LIVE_DETAIL_SHEET = "weIxvN"
+DRINK_SHOP_FALLBACK_ROW = 33
+FOOD_SHOP_FALLBACK_ROW = 245
+LIVE_DATA_FALLBACK_ROW = 631
 
 ACCOUNTS = [
     "阴山优麦冲饮旗舰店",
@@ -362,6 +365,8 @@ def build_writes(day, offline_example=False, qianchuan_cost=None, shop="drink"):
 
     if shop == "food":
         food_row = find_date_row(REPORT, FOOD_SHOP_SHEET, serial)
+        food_row = food_row or FOOD_SHOP_FALLBACK_ROW
+        add((REPORT, f"{FOOD_SHOP_SHEET}!A{food_row}", [[serial]]))
         if food_row:
             add((REPORT, f"{FOOD_SHOP_SHEET}!B{food_row}", [[report_total_gmv]]))
             if qianchuan_cost is not None:
@@ -380,9 +385,9 @@ def build_writes(day, offline_example=False, qianchuan_cost=None, shop="drink"):
         return writes
 
     # UUAtO2 — 仪表盘数据源
-    uu_row = day_num + 6
-    # 当前 UUAtO2 表头在第 1 行，8月1日从第 2 行开始
-    uu_row = day_num + 1
+    uu_row = find_date_row(REPORT, "UUAtO2", serial)
+    uu_row = uu_row or DRINK_SHOP_FALLBACK_ROW
+    add((REPORT, f"UUAtO2!A{uu_row}", [[serial]]))
     add((REPORT, f"UUAtO2!B{uu_row}", [[report_total_gmv]]))
     if qianchuan_cost is not None:
         add((REPORT, f"UUAtO2!C{uu_row}", [[rounded(qianchuan_cost, 2)]]))
@@ -416,6 +421,8 @@ def build_writes(day, offline_example=False, qianchuan_cost=None, shop="drink"):
     if records:
         agg = aggregate_live_records(records)
         live_row = find_live_data_row(serial)
+        live_row = live_row or LIVE_DATA_FALLBACK_ROW
+        add((LIVE_DATA, f"{LIVE_SHEET}!A{live_row}", [[serial]]))
         if live_row:
             duration_h = round(agg["直播时长_min"] / 60)
             avg_stay_sec = round(agg["平均停留_min"] * 60, 2)

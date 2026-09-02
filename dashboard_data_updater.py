@@ -26,6 +26,7 @@ FOOD_ANCHOR_SHEET = "cdzpqi"
 FOOD_ANCHOR_LEGACY_SHEET = "sXKpGG"
 FOOD_SHOP_SHEET = "9VVamg"
 FOOD_LIVE_SHEET = "weIxvN"
+REPORT_MONTH_START = date(2026, 9, 1)
 
 def lark_read(token, range_expr, value_render=None, identity="bot", timeout=15):
     cmd = [LARK_CLI, "sheets", "+read", "--as", identity,
@@ -349,7 +350,7 @@ def parse_live_date(value):
 
 def fetch_live_history():
     """从 cC79qR 读取阴山优麦冲饮旗舰店每日直播明细，供历史漏斗按日期区间聚合。"""
-    values = lark_read(TOKEN, "cC79qR!A1:BB200")
+    values = lark_read(TOKEN, "cC79qR!A1:BB1000")
     if not values:
         return []
     records = []
@@ -390,7 +391,7 @@ def default_food():
     return {
         "knownDays": [],
         "latest": {"day": 0, "b": None, "c": None, "d": None, "e": None, "f": None, "g": None, "h": None, "date": None},
-        "targetGmv": 840000,
+        "targetGmv": 880000,
         "targetGsv": 720000,
         "monthly": {"gmv": 0, "spend": 0, "gsv": 0, "duration": 0, "roi": 0},
         "funnel": None,
@@ -401,8 +402,8 @@ def default_food():
     }
 
 def fetch_food_known_days():
-    """从 9VVamg 读取食品店 1-8 月逐日成交数据。"""
-    values = lark_read(TOKEN, f"{FOOD_SHOP_SHEET}!A2:I245", identity="user", timeout=30)
+    """从 9VVamg 读取食品店逐日成交数据。"""
+    values = lark_read(TOKEN, f"{FOOD_SHOP_SHEET}!A2:I400", identity="user", timeout=30)
     if not values:
         return []
     out = []
@@ -462,7 +463,7 @@ def fetch_food_summary():
 
 def fetch_food_live_history():
     """从 weIxvN 读取阴山优麦食品旗舰店直播明细。"""
-    values = lark_read(TOKEN, f"{FOOD_LIVE_SHEET}!A2:BB199", identity="user", timeout=30)
+    values = lark_read(TOKEN, f"{FOOD_LIVE_SHEET}!A2:BB1000", identity="user", timeout=30)
     if not values:
         return []
     records = []
@@ -653,13 +654,14 @@ def fetch_food_data():
             funnel = build_food_funnel([r for r in live if r["date"] == dates[-1]])
             if len(dates) > 1:
                 funnel_prev = build_food_funnel([r for r in live if r["date"] == dates[-2]])
-    aug = [d for d in known if d["date"].startswith("2026-08")]
+    month_start = REPORT_MONTH_START.isoformat()
+    month_days = [d for d in known if d["date"] and d["date"] >= month_start]
     monthly = {
-        "gmv": rounded(sum(d["dv"] for d in aug), 2),
-        "spend": rounded(sum(d["sp"] or 0 for d in aug), 2),
-        "gsv": rounded(sum(d["gsv"] or 0 for d in aug), 2),
-        "duration": rounded(sum(d["duration"] or 0 for d in aug), 2),
-        "roi": rounded(sum(d["dv"] for d in aug) / sum(d["sp"] or 0 for d in aug), 2) if sum(d["sp"] or 0 for d in aug) else 0,
+        "gmv": rounded(sum(d["dv"] for d in month_days), 2),
+        "spend": rounded(sum(d["sp"] or 0 for d in month_days), 2),
+        "gsv": rounded(sum(d["gsv"] or 0 for d in month_days), 2),
+        "duration": rounded(sum(d["duration"] or 0 for d in month_days), 2),
+        "roi": rounded(sum(d["dv"] for d in month_days) / sum(d["sp"] or 0 for d in month_days), 2) if sum(d["sp"] or 0 for d in month_days) else 0,
     }
     latest_obj = {
         "date": latest["date"], "day": latest["day"], "b": latest["dv"], "c": latest["sp"],
@@ -669,10 +671,10 @@ def fetch_food_data():
     return {
         "knownDays": known,
         "latest": latest_obj,
-        "targetGmv": targets.get("targetGmv") or 840000,
+        "targetGmv": targets.get("targetGmv") or 880000,
         "targetGsv": targets.get("targetGsv") or 720000,
-        "gapGmv": targets.get("gapGmv"),
-        "gapGsv": targets.get("gapGsv"),
+        "gapGmv": rounded((targets.get("targetGmv") or 880000) - monthly["gmv"], 2),
+        "gapGsv": rounded((targets.get("targetGsv") or 720000) - monthly["gsv"], 2),
         "monthly": monthly,
         "funnel": funnel,
         "funnelPrev": funnel_prev,
@@ -682,7 +684,7 @@ def fetch_food_data():
     }
 
 def fetch_data():
-    rows = lark_read(TOKEN, "UUAtO2!A2:O32")
+    rows = lark_read(TOKEN, "UUAtO2!A2:O400")
     if rows is None:
         return None
 
@@ -696,8 +698,8 @@ def fetch_data():
         dv = pn(row[1]) if len(row) > 1 else None
         sp = pn(row[2]) if len(row) > 2 else None
         if dv is not None:
-            day_num = i + 1
             business_date = parse_date_cell(row[0]) if row else None
+            day_num = int(business_date[8:10]) if business_date else i + 1
             known.append({
                 "date": business_date,
                 "day": day_num,
@@ -724,7 +726,7 @@ def fetch_data():
         row = rows[latest_idx]
         out["latest"] = {
             "date": parse_date_cell(row[0]) if row else None,
-            "day": latest_idx + 1,
+            "day": known[-1]["day"],
             "b": pn(row[1]) if len(row) > 1 else None,
             "c": pn(row[2]) if len(row) > 2 else None,
             "d": pn(row[3]) if len(row) > 3 else None,
@@ -765,10 +767,14 @@ def fetch_data():
     out["anchorHistory"] = fetch_anchor_history()
 
     # 月度汇总：从 UUAtO2 每日 J/K（低GI视频号）与 M/N（冲饮视频号）汇总并计算 ROI
-    low_gmv = sum(pn(r[9]) or 0 for r in rows if len(r) > 9)
-    low_spend = sum(pn(r[10]) or 0 for r in rows if len(r) > 10)
-    vid_gmv = sum(pn(r[12]) or 0 for r in rows if len(r) > 12)
-    vid_spend = sum(pn(r[13]) or 0 for r in rows if len(r) > 13)
+    month_rows = [
+        row for row in rows
+        if (d := parse_date_cell(row[0] if row else None)) and d >= REPORT_MONTH_START.isoformat()
+    ]
+    low_gmv = sum(pn(r[9]) or 0 for r in month_rows if len(r) > 9)
+    low_spend = sum(pn(r[10]) or 0 for r in month_rows if len(r) > 10)
+    vid_gmv = sum(pn(r[12]) or 0 for r in month_rows if len(r) > 12)
+    vid_spend = sum(pn(r[13]) or 0 for r in month_rows if len(r) > 13)
     out["postalMonthly"] = {
         "gmv": rounded(low_gmv, 2),
         "spend": rounded(low_spend, 2),
@@ -779,7 +785,7 @@ def fetch_data():
         "spend": rounded(vid_spend, 2),
         "roi": rounded(vid_gmv / vid_spend, 2) if vid_spend else 0,
     }
-    out["targetGmv"] = 2800000
+    out["targetGmv"] = 3200000
     out["targetRoi"] = 3
     # 漏斗数据：优先本地 Excel（最新日期）；CI 云端无 Excel 时保留上一版值
     funnel = fetch_funnel_from_excel()

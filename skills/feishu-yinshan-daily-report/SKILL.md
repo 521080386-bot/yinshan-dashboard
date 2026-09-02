@@ -36,7 +36,7 @@ description: Fill the Yinshan Youmai Feishu daily data report from local Douyin 
      --date YYYY-MM-DD --shop food --qianchuan-cost <食品千川消耗> --mode write
    ```
    - `--shop drink` 写冲饮店；`--shop food` 写食品店。
-   - 脚本会自动写：冲饮 `UUAtO2`、`zsta38`、`bea4e1`、`cC79qR`；食品 `9VVamg`、`zsta38`、`weIxvN`。
+   - 脚本会自动写：冲饮 `UUAtO2`、`YKWQjE`、`bea4e1`、`cC79qR`；食品 `9VVamg`、`YKWQjE`、`weIxvN`。
    - 直播明细表已存在当日数据时会自动跳过，不会重复追加。
    - 脚本联网写飞书需要授权；沙箱内失败就升级网络权限后重跑。
 
@@ -66,7 +66,7 @@ description: Fill the Yinshan Youmai Feishu daily data report from local Douyin 
 | `Jos6sfYSRh4eWXtZalBcoFetnCe` | `9VVamg` | 食品店店铺数据 |
 | `Jos6sfYSRh4eWXtZalBcoFetnCe` | `cC79qR` | 冲饮店直播间明细 |
 | `Jos6sfYSRh4eWXtZalBcoFetnCe` | `weIxvN` | 食品店直播数据表 |
-| `shtcnzv0loZQg1qk25PcCVonplW` | `zsta38` | 2026-8 月度大表 |
+| `shtcnzv0loZQg1qk25PcCVonplW` | `YKWQjE` | 2026-9 月度大表 |
 | `shtcniNUd2HqPd8ZvZOt8btOScf` | `bea4e1` | 冲饮店直播间汇总表 |
 | `CD2psfSlghdutdt9wHmcOJaDntf` | `cdzpqi` | 食品店交班数据（主播班次） |
 
@@ -74,11 +74,11 @@ description: Fill the Yinshan Youmai Feishu daily data report from local Douyin 
 
 ### 冲饮店
 
-- `UUAtO2`：行 = `day + 1`（8 月起表头在第 1 行，8月1日从第 2 行开始）
+- `UUAtO2`：按 Excel 日期序列定位行；9 月 1 日从第 33 行开始。
   - `B` 抖音GMV、`C` 千川消耗（传入 `--qianchuan-cost` 才写）、`D-H` 直播/短视频/商品卡/其他/图文
   - `J/K/L` 邮政 GMV / 消耗 / ROI
   - `I` 当日ROI 由公式计算，不写
-- `zsta38`：行 = `day + 4`
+- `YKWQjE`：行 = `day + 4`
   - `D` 抖音GMV、`F` 千川/全店消耗、`Q/R/S` 邮政 GMV / 消耗 / ROI
 - `bea4e1`：按 Excel 日期序列定位行
   - `B` 场观、`C` 直播间成交金额、`E` 直播时长小时、`F` 投放消耗、`G` 投放GMV
@@ -90,7 +90,7 @@ description: Fill the Yinshan Youmai Feishu daily data report from local Douyin 
 
 - `9VVamg`：按 Excel 日期序列定位行
   - `B` 抖音GMV、`C` 千川消耗、`D-H` 直播/短视频/商品卡/其他/图文、`I` 当日ROI
-- `zsta38`：行 = `day + 4`
+- `YKWQjE`：行 = `day + 4`
   - `K` 抖音GMV、`M` 千川/全店消耗；`J` 总GMV含智能券由 `K+L` 公式自动计算
 - `weIxvN`：自动追加当日原始直播明细行
 
@@ -103,7 +103,7 @@ description: Fill the Yinshan Youmai Feishu daily data report from local Douyin 
 
 - 直播明细：`直播间明细` 表，账号名在 B 列，GMV 在第 26 列，投放消耗在第 44 列。
 - 罗盘：`自营成交` 表，取目标日期、`不限` 投放时段、`成交金额` 列（脚本按表头自动识别列位置，冲饮/食品罗盘列序不同也能兼容）。
-- 冲饮全店 GMV = 各载体成交金额之和；zsta38 `D` 再扣除燕麦片/燕麦米账号 GMV。
+- 冲饮全店 GMV = 各载体成交金额之和；YKWQjE `D` 再扣除燕麦片/燕麦米账号 GMV。
 - ROI = GMV / 千川消耗，保留 2 位小数；消耗为 0 时写 0。
 
 ## 验证
@@ -111,7 +111,7 @@ description: Fill the Yinshan Youmai Feishu daily data report from local Douyin 
 ```bash
 lark-cli sheets +read --as user --spreadsheet-token "Jos6sfYSRh4eWXtZalBcoFetnCe" --range "UUAtO2!A28:O28" --value-render-option FormattedValue --format json
 lark-cli sheets +read --as user --spreadsheet-token "Jos6sfYSRh4eWXtZalBcoFetnCe" --range "9VVamg!A240:I240" --value-render-option FormattedValue --format json
-lark-cli sheets +read --as user --spreadsheet-token "shtcnzv0loZQg1qk25PcCVonplW" --range "zsta38!B31:CR31" --value-render-option FormattedValue --format json
+lark-cli sheets +read --as user --spreadsheet-token "shtcnzv0loZQg1qk25PcCVonplW" --range "YKWQjE!A5:CR5" --value-render-option FormattedValue --format json
 lark-cli sheets +read --as user --spreadsheet-token "shtcniNUd2HqPd8ZvZOt8btOScf" --range "bea4e1!B625:N625" --value-render-option FormattedValue --format json
 ```
 
