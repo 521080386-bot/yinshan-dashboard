@@ -25,6 +25,7 @@ FOOD_SUMMARY_SHEET = "KYcREK"
 FOOD_ANCHOR_SHEET = "cdzpqi"
 FOOD_ANCHOR_LEGACY_SHEET = "sXKpGG"
 FOOD_SHOP_SHEET = "9VVamg"
+DRINK_DATA_DIR = "阴山冲饮数据明细"
 FOOD_LIVE_SHEET = "weIxvN"
 REPORT_MONTH_START = date(2026, 9, 1)
 
@@ -307,9 +308,9 @@ def build_funnel_from_workbook(path):
 
 
 def fetch_funnel_from_excel():
-    """取本地最新一份直播明细 Excel 的漏斗数据。"""
+    """取冲饮店最新一份直播明细 Excel 的漏斗数据。"""
     try:
-        base_dir = os.path.dirname(os.path.abspath(__file__))
+        base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), DRINK_DATA_DIR)
         files = sorted(glob.glob(os.path.join(base_dir, "直播明细_全部账号_*.xlsx")))
         if not files:
             return None
@@ -320,9 +321,9 @@ def fetch_funnel_from_excel():
 
 
 def fetch_prev_funnel_from_excel():
-    """取本地倒数第二份直播明细 Excel 的昨日漏斗数据。"""
+    """取冲饮店倒数第二份直播明细 Excel 的昨日漏斗数据。"""
     try:
-        base_dir = os.path.dirname(os.path.abspath(__file__))
+        base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), DRINK_DATA_DIR)
         files = sorted(glob.glob(os.path.join(base_dir, "直播明细_全部账号_*.xlsx")))
         if len(files) < 2:
             return None
