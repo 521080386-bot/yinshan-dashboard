@@ -76,7 +76,7 @@ description: Fill the Yinshan Youmai Feishu daily data report from local Douyin 
 
 - `UUAtO2`：按 Excel 日期序列定位行；9 月 1 日从第 33 行开始。
   - `B` 抖音GMV、`C` 千川消耗（传入 `--qianchuan-cost` 才写）、`D-H` 直播/短视频/商品卡/其他/图文
-  - `J/K/L` 邮政 GMV / 消耗 / ROI
+  - `L` 低GI视频号 ROI；`J/K`（低GI视频号GMV/消耗）由用户手动维护，脚本不写
   - `I` 当日ROI 由公式计算，不写
 - `YKWQjE`：行 = `day + 4`
   - `D` 抖音GMV、`F` 千川/全店消耗、`Q/R/S` 邮政 GMV / 消耗 / ROI

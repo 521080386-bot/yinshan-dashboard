@@ -397,8 +397,7 @@ def build_writes(day, offline_example=False, qianchuan_cost=None, shop="drink"):
     add((REPORT, f"UUAtO2!F{uu_row}", [[rounded(carriers["商品卡"])]]))
     add((REPORT, f"UUAtO2!G{uu_row}", [[rounded(carriers["其他"])]]))
     add((REPORT, f"UUAtO2!H{uu_row}", [[rounded(carriers["图文"])]]))
-    add((REPORT, f"UUAtO2!J{uu_row}", [[rounded(postal["gmv"])]]))
-    add((REPORT, f"UUAtO2!K{uu_row}", [[rounded(postal["cost"])]]))
+    # 低GI视频号GMV/消耗由用户手动维护，脚本只更新ROI。
     add((REPORT, f"UUAtO2!L{uu_row}", [[roi(postal["gmv"], postal["cost"])]]))
 
     add((MONTHLY, f"{MONTHLY_SHEET}!D{monthly_row}", [[full_gmv]]))
