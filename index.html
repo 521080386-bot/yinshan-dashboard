@@ -901,31 +901,45 @@ createApp({setup(){
       renderTrend();renderAnchorHist();renderHistLayer();renderHistWatchRate()
     }
   }
+  function parseLocalDate(value){
+    const [y,m,d]=String(value||'').split('-').map(Number)
+    if(!y||!m)return new Date(1970,0,1)
+    return new Date(y,m-1,d||1)
+  }
+  function localIso(d){
+    const pad=n=>String(n).padStart(2,'0')
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`
+  }
+  function actualToday(){
+    const now=new Date()
+    return new Date(now.getFullYear(),now.getMonth(),now.getDate())
+  }
   function initHistRange(){
     if(activeKnownDays.value.length===0)return
     const y=Number(String(businessDate.value||'').slice(0,4))||Number(String(updateDate.value||'').slice(0,4))||2026,m=currentMonth.value
     const pad=n=>String(n).padStart(2,'0')
     const firstDay=activeKnownDays.value[0]?.day||1,lastDay=activeKnownDays.value[activeKnownDays.value.length-1]?.day
-    // 主播历史可能超出 knownDays 范围，取两者交集；默认显示最近 7 天
+    // 主播历史可能超出 knownDays 范围；时间控件以真实自然日为基准，默认包含当日。
     const histDates=[...activeKnownDays.value.map(d=>d.date),...activeAnchorHistory.value.map(h=>h.date),...activeLiveHistory.value.map(r=>r.date)].filter(Boolean).sort()
-    const hMax=histDates.length?histDates[histDates.length-1]:`${y}-${pad(m)}-${pad(lastDay)}`
+    const dataMax=histDates.length?histDates[histDates.length-1]:`${y}-${pad(m)}-${pad(lastDay)}`
+    const today=actualToday()
+    const hMax=parseLocalDate(dataMax)>today?dataMax:localIso(today)
     const hMin=histDates.length?histDates[0]:`${y}-${pad(m)}-${pad(firstDay)}`
     histMaxDate.value=hMax
     histEnd.value=hMax
-    const endD=new Date(hMax)
-    const startD=new Date(endD);startD.setDate(startD.getDate()-6)
-    histStart.value=startD<hMin?hMin:startD.toISOString().slice(0,10)
+    const startD=new Date(today.getFullYear(),today.getMonth(),today.getDate()-6)
+    histStart.value=startD<parseLocalDate(hMin)?hMin:localIso(startD)
+    quickKey.value='7d'
   }
   function onHistRangeChange(){
-    if(histRangeDays.value>31){histEnd.value=histStart.value?new Date(new Date(histStart.value).getTime()+30*86400000).toISOString().slice(0,10):histEnd.value}
+    if(histRangeDays.value>31){const s=parseLocalDate(histStart.value);s.setDate(s.getDate()+30);histEnd.value=histStart.value?localIso(s):histEnd.value}
     quickKey.value=''
     nextTick(()=>{renderTrend();renderAnchorHist();renderHistLayer();renderHistWatchRate()})
   }
   // 快捷时间范围：昨日 / 近7天 / 上周 / 上月 / 本月
   function applyQuick(key){
-    const today=businessDate.value?new Date(businessDate.value):new Date()
-    const pad=n=>String(n).padStart(2,'0')
-    const iso=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`
+    const today=actualToday()
+    const iso=localIso
     let s,e
     if(key==='7d'){
       e=new Date(today);s=new Date(today);s.setDate(s.getDate()-6)
@@ -943,9 +957,9 @@ createApp({setup(){
       const lastDayPrev=new Date(firstThis);lastDayPrev.setDate(0) // 上月最后一天
       const firstPrev=new Date(lastDayPrev.getFullYear(),lastDayPrev.getMonth(),1)
       s=firstPrev;e=lastDayPrev
-    }else{ // thisMonth: 当月1号 ~ 前一日
+    }else{ // thisMonth: 当月1号 ~ 今日
       s=new Date(today.getFullYear(),today.getMonth(),1)
-      e=new Date(today);e.setDate(e.getDate()-1)
+      e=new Date(today.getFullYear(),today.getMonth(),today.getDate())
     }
     histStart.value=iso(s);histEnd.value=iso(e);quickKey.value=key
     nextTick(()=>{renderTrend();renderAnchorHist();renderHistLayer();renderHistWatchRate()})
