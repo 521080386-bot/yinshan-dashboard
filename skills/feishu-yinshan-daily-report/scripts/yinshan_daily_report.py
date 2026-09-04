@@ -164,16 +164,31 @@ def load_live_detail(day, account_name, shop="drink"):
 def find_live_data_row(target_serial):
     """Find the row number in the live data sheet (bea4e1) matching the date serial."""
     values = run_lark_read(LIVE_DATA, f"{LIVE_SHEET}!A:A")
+    last_filled = 0
     for i, row in enumerate(values):
-        if row and int(num(row[0])) == target_serial:
+        if parse_date_cell(row[0]) == target_serial:
             return i + 1
-    return None
+        if any(value not in (None, "") for value in row):
+            last_filled = i + 1
+    return last_filled + 1
+
+
+def parse_date_cell(value):
+    """Return an Excel serial for numeric or text dates such as 2026/9/2."""
+    if isinstance(value, (int, float)):
+        return int(value)
+    text = str(value or "").strip()
+    match = re.match(r"(\d{4})[/-](\d{1,2})[/-](\d{1,2})", text)
+    if match:
+        return excel_serial(dt.date(*(int(part) for part in match.groups())))
+    numeric = num(text)
+    return int(numeric) if numeric else None
 
 def find_date_row(token, sheet, target_serial):
     """Find the row number in any sheet where column A matches an Excel serial."""
     values = run_lark_read(token, f"{sheet}!A:A")
     for i, row in enumerate(values):
-        if row and int(num(row[0])) == target_serial:
+        if row and parse_date_cell(row[0]) == target_serial:
             return i + 1
     return None
 
