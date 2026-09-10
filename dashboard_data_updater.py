@@ -191,7 +191,7 @@ def fetch_anchor_blocks():
     """读取 KFTIUP 全部日期块（FormattedValue 直接取公式计算值）。
     返回 {serial: anchors_list}，按日期升序。
     A 列在 FormattedValue 模式下可能是日期字符串（如 2026/03/15）或 serial 数字，均需兼容。"""
-    values = lark_read(HANDOFF, f"{HANDOFF_SHEET}!A:I", value_render="FormattedValue")
+    values = lark_read(HANDOFF, f"{HANDOFF_SHEET}!A:I", value_render="UnformattedValue")
     if not values:
         return {}
 
@@ -435,7 +435,7 @@ def fetch_food_known_days():
 
 def fetch_food_summary():
     """从 KYcREK 读取食品店每日消耗/时长/GSV 与目标。"""
-    values = lark_read(FOOD_DAILY, f"{FOOD_SUMMARY_SHEET}!A1:J45", value_render="FormattedValue", identity="user", timeout=30)
+    values = lark_read(FOOD_DAILY, f"{FOOD_SUMMARY_SHEET}!A1:J45", value_render="UnformattedValue", identity="user", timeout=30)
     if not values:
         return {}, {}
     summary = {}
@@ -690,33 +690,45 @@ def fetch_food_data():
     }
 
 def fetch_data():
-    rows = lark_read(TOKEN, "UUAtO2!A2:O400")
+    rows = lark_read(TOKEN, "UUAtO2!A2:R400", value_render="UnformattedValue")
     if rows is None:
         return None
 
     out = {}
 
-    # 所有已知日期数据
+    # 有机燕麦片是独立渠道；全店口径需扣除 P/Q 两列
     known = []
+    organic_hist = []
     postal_hist = []
     latest_idx = None
     for i, row in enumerate(rows):
-        dv = pn(row[1]) if len(row) > 1 else None
-        sp = pn(row[2]) if len(row) > 2 else None
-        if dv is not None:
+        raw_dv = pn(row[1]) if len(row) > 1 else None
+        raw_sp = pn(row[2]) if len(row) > 2 else None
+        if raw_dv is not None:
             business_date = parse_date_cell(row[0]) if row else None
             day_num = int(business_date[8:10]) if business_date else i + 1
+            organic_gmv = (pn(row[15]) or 0) if len(row) > 15 else 0
+            organic_spend = (pn(row[16]) or 0) if len(row) > 16 else 0
+            raw_live = pn(row[3]) if len(row) > 3 else None
             known.append({
                 "date": business_date,
                 "day": day_num,
-                "dv": dv,
-                "sp": sp or 0,
-                "live": pn(row[3]) if len(row) > 3 else None,
+                "dv": raw_dv - organic_gmv,
+                "sp": (raw_sp or 0) - organic_spend,
+                "live": raw_live - organic_gmv if raw_live is not None else None,
                 "short_video": pn(row[4]) if len(row) > 4 else None,
                 "card": pn(row[5]) if len(row) > 5 else None,
                 "other": pn(row[6]) if len(row) > 6 else None,
                 "graphic": pn(row[7]) if len(row) > 7 else None,
             })
+            if organic_gmv or organic_spend:
+                organic_hist.append({
+                    "date": business_date,
+                    "day": day_num,
+                    "gmv": organic_gmv,
+                    "spend": organic_spend,
+                    "roi": rounded(organic_gmv / organic_spend, 2) if organic_spend else 0,
+                })
             latest_idx = i
 
             pg = pn(row[9]) if len(row) > 9 else None
@@ -725,6 +737,7 @@ def fetch_data():
                 postal_hist.append({"day": day_num, "pg": pg, "ps": ps or 0})
 
     out["knownDays"] = known
+    out["organicHistory"] = organic_hist
     out["postalHistory"] = postal_hist
 
     # 最新一天的明细
@@ -733,9 +746,9 @@ def fetch_data():
         out["latest"] = {
             "date": parse_date_cell(row[0]) if row else None,
             "day": known[-1]["day"],
-            "b": pn(row[1]) if len(row) > 1 else None,
-            "c": pn(row[2]) if len(row) > 2 else None,
-            "d": pn(row[3]) if len(row) > 3 else None,
+            "b": known[-1]["dv"],
+            "c": known[-1]["sp"],
+            "d": known[-1]["live"],
             "e": pn(row[4]) if len(row) > 4 else None,
             "f": pn(row[5]) if len(row) > 5 else None,
             "g": pn(row[6]) if len(row) > 6 else None,
@@ -743,6 +756,8 @@ def fetch_data():
         }
         pg = pn(row[9]) if len(row) > 9 else None
         ps = pn(row[10]) if len(row) > 10 else None
+        og = pn(row[15]) if len(row) > 15 else None
+        os_ = pn(row[16]) if len(row) > 16 else None
         out["postal"] = {
             "gmv": pg if pg else 0,
             "spend": ps if ps else 0,
@@ -755,10 +770,16 @@ def fetch_data():
             "spend": vs if vs else 0,
             "roi": round(vg / vs, 2) if (vg is not None and vs and vs > 0) else 0
         }
+        out["organic"] = {
+            "gmv": og or 0,
+            "spend": os_ or 0,
+            "roi": rounded((og or 0) / os_, 2) if os_ else 0
+        }
     else:
         out["latest"] = {"day": 0}
         out["postal"] = {"gmv": 0, "spend": 0, "roi": 0}
         out["video"] = {"gmv": 0, "spend": 0, "roi": 0}
+        out["organic"] = {"gmv": 0, "spend": 0, "roi": 0}
 
     # 主播班次数据（从 KFTIUP 读取）
     # target_serial = 最新完整数据日的 Excel serial（取 knownDays 最新一天对应日期）
@@ -790,6 +811,13 @@ def fetch_data():
         "gmv": rounded(vid_gmv, 2),
         "spend": rounded(vid_spend, 2),
         "roi": rounded(vid_gmv / vid_spend, 2) if vid_spend else 0,
+    }
+    organic_gmv = sum(pn(r[15]) or 0 for r in month_rows if len(r) > 15)
+    organic_spend = sum(pn(r[16]) or 0 for r in month_rows if len(r) > 16)
+    out["organicMonthly"] = {
+        "gmv": rounded(organic_gmv, 2),
+        "spend": rounded(organic_spend, 2),
+        "roi": rounded(organic_gmv / organic_spend, 2) if organic_spend else 0,
     }
     out["targetGmv"] = 3200000
     out["targetRoi"] = 3

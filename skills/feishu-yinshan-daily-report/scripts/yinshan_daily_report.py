@@ -417,7 +417,8 @@ def build_writes(day, offline_example=False, qianchuan_cost=None, shop="drink"):
 
     add((MONTHLY, f"{MONTHLY_SHEET}!D{monthly_row}", [[full_gmv]]))
     if qianchuan_cost is not None:
-        add((MONTHLY, f"{MONTHLY_SHEET}!F{monthly_row}", [[rounded(qianchuan_cost, 2)]]))
+        full_cost = qianchuan_cost - oat_flake["cost"]
+        add((MONTHLY, f"{MONTHLY_SHEET}!F{monthly_row}", [[rounded(full_cost, 2)]]))
     for col, data in [("Q", postal)]:
         gmv = rounded(data["gmv"])
         cost = rounded(data["cost"])
