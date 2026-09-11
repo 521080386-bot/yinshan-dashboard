@@ -231,9 +231,8 @@ def fetch_anchors(target_serial=None):
     blocks = fetch_anchor_blocks()
     if not blocks:
         return []
-    if target_serial is not None and int(target_serial) in blocks:
-        return blocks[int(target_serial)]
-    # 回退：取所有块中 serial 最大的
+    if target_serial is not None:
+        return blocks.get(int(target_serial), [])
     last = max(blocks.keys())
     return blocks[last]
 
@@ -782,13 +781,13 @@ def fetch_data():
         out["organic"] = {"gmv": 0, "spend": 0, "roi": 0}
 
     # 主播班次数据（从 KFTIUP 读取）
-    # target_serial = 最新完整数据日的 Excel serial（取 knownDays 最新一天对应日期）
-    # 需求：主播栏维持前一日数据，不取 KFTIUP 中"当日"（可能未填完）的块
+    # 需求：日报面板固定查询最新数据日的前一日，不读取当日未填完的班次块
     if latest_idx is not None:
         latest_date_serial = pn(rows[latest_idx][0])
+        previous_date_serial = latest_date_serial - 1 if latest_date_serial else None
     else:
-        latest_date_serial = None
-    out["anchors"] = fetch_anchors(latest_date_serial)
+        previous_date_serial = None
+    out["anchors"] = fetch_anchors(previous_date_serial)
 
     # 历史主播数据（全部日期块，供历史查询页使用）
     out["anchorHistory"] = fetch_anchor_history()
