@@ -12,7 +12,7 @@
 本地 Excel 时保留上一版值（不覆盖）。
 """
 import json, subprocess, sys, os, re, ast, glob, argparse
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 
 LARK_CLI = os.environ.get("LARK_CLI", "/Users/apple/Documents/Codex/2026-06-03/cli/lark-cli")
 TOKEN = os.environ.get("DASHBOARD_SHEET_TOKEN", "Jos6sfYSRh4eWXtZalBcoFetnCe")
@@ -781,13 +781,10 @@ def fetch_data():
         out["organic"] = {"gmv": 0, "spend": 0, "roi": 0}
 
     # 主播班次数据（从 KFTIUP 读取）
-    # 需求：日报面板固定查询最新数据日的前一日，不读取当日未填完的班次块
-    if latest_idx is not None:
-        latest_date_serial = pn(rows[latest_idx][0])
-        previous_date_serial = latest_date_serial - 1 if latest_date_serial else None
-    else:
-        previous_date_serial = None
-    out["anchors"] = fetch_anchors(previous_date_serial)
+    # 需求：日报面板固定查询当前日历日的前一日（如 9/11 运行取 9/10）
+    anchor_date = date.today() - timedelta(days=1)
+    anchor_date_serial = excel_serial(anchor_date)
+    out["anchors"] = fetch_anchors(anchor_date_serial)
 
     # 历史主播数据（全部日期块，供历史查询页使用）
     out["anchorHistory"] = fetch_anchor_history()
