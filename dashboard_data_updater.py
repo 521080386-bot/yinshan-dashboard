@@ -712,7 +712,7 @@ def fetch_data():
             known.append({
                 "date": business_date,
                 "day": day_num,
-                "dv": raw_dv - organic_gmv,
+                "dv": raw_dv,
                 "sp": (raw_sp or 0) - organic_spend,
                 "live": raw_live - organic_gmv if raw_live is not None else None,
                 "short_video": pn(row[4]) if len(row) > 4 else None,
