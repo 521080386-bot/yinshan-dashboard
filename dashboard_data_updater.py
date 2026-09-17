@@ -713,7 +713,7 @@ def fetch_data():
                 "date": business_date,
                 "day": day_num,
                 "dv": raw_dv,
-                "sp": (raw_sp or 0) - organic_spend,
+                "sp": rounded(raw_sp or 0, 2),
                 "live": raw_live - organic_gmv if raw_live is not None else None,
                 "short_video": pn(row[4]) if len(row) > 4 else None,
                 "card": pn(row[5]) if len(row) > 5 else None,
