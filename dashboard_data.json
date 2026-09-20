@@ -527,6 +527,28 @@
       "card": 9700.2,
       "other": 4984.9,
       "graphic": 0.0
+    },
+    {
+      "date": "2026-09-18",
+      "day": 18,
+      "dv": 123826.11,
+      "sp": 42372.19,
+      "live": 108952.92000000001,
+      "short_video": 1147.1,
+      "card": 7877.49,
+      "other": 5848.6,
+      "graphic": 0.0
+    },
+    {
+      "date": "2026-09-19",
+      "day": 19,
+      "dv": 127755.96,
+      "sp": 42581.96,
+      "live": 112206.56,
+      "short_video": 1316.5,
+      "card": 8732.0,
+      "other": 5500.9,
+      "graphic": 0.0
     }
   ],
   "organicHistory": [
@@ -578,6 +600,20 @@
       "gmv": 6253.8,
       "spend": 2547.35,
       "roi": 2.46
+    },
+    {
+      "date": "2026-09-18",
+      "day": 18,
+      "gmv": 4225.9,
+      "spend": 2113.72,
+      "roi": 2.0
+    },
+    {
+      "date": "2026-09-19",
+      "day": 19,
+      "gmv": 2487.6,
+      "spend": 1044.37,
+      "roi": 2.38
     }
   ],
   "postalHistory": [
@@ -720,61 +756,66 @@
       "day": 15,
       "pg": 69.9,
       "ps": 16.06
+    },
+    {
+      "day": 19,
+      "pg": 89.9,
+      "ps": 23.46
     }
   ],
   "latest": {
-    "date": "2026-09-17",
-    "day": 17,
-    "b": 121467.12,
-    "c": 39876.22,
-    "d": 106153.62,
-    "e": 628.4,
-    "f": 9700.2,
-    "g": 4984.9,
+    "date": "2026-09-19",
+    "day": 19,
+    "b": 127755.96,
+    "c": 42581.96,
+    "d": 112206.56,
+    "e": 1316.5,
+    "f": 8732.0,
+    "g": 5500.9,
     "h": 0.0
   },
   "postal": {
-    "gmv": 0,
-    "spend": 11.5,
-    "roi": 0.0
+    "gmv": 89.9,
+    "spend": 23.46,
+    "roi": 3.83
   },
   "video": {
-    "gmv": 729.3,
-    "spend": 354.22,
-    "roi": 2.06
+    "gmv": 1108.9,
+    "spend": 302.42,
+    "roi": 3.67
   },
   "organic": {
-    "gmv": 6253.8,
-    "spend": 2547.35,
-    "roi": 2.46
+    "gmv": 2487.6,
+    "spend": 1044.37,
+    "roi": 2.38
   },
   "anchors": [
     {
-      "name": "张铭",
-      "gmv": 32172.0,
-      "spend": 12301.0,
-      "roi": 2.62,
-      "hours": 4.5
-    },
-    {
-      "name": "范范",
-      "gmv": 23517.0,
-      "spend": 9086.0,
-      "roi": 2.59,
-      "hours": 4.5
-    },
-    {
       "name": "查查",
-      "gmv": 26261.0,
-      "spend": 9756.0,
-      "roi": 2.69,
+      "gmv": 30726.0,
+      "spend": 11384.0,
+      "roi": 2.7,
       "hours": 4.5
     },
     {
       "name": "杨琼",
-      "gmv": 23121.0,
-      "spend": 7892.0,
-      "roi": 2.93,
+      "gmv": 23844.0,
+      "spend": 9227.0,
+      "roi": 2.58,
+      "hours": 4.5
+    },
+    {
+      "name": "孙玉洁",
+      "gmv": 30795.0,
+      "spend": 11988.0,
+      "roi": 2.57,
+      "hours": 4.5
+    },
+    {
+      "name": "范范",
+      "gmv": 26342.0,
+      "spend": 8796.0,
+      "roi": 2.99,
       "hours": 4.5
     }
   ],
@@ -7136,74 +7177,142 @@
           "hours": 4.5
         }
       ]
+    },
+    {
+      "serial": 46283,
+      "date": "2026-09-18",
+      "anchors": [
+        {
+          "name": "范范",
+          "gmv": 29881.0,
+          "spend": 11051.0,
+          "roi": 2.7,
+          "hours": 4.5
+        },
+        {
+          "name": "查查",
+          "gmv": 29934.0,
+          "spend": 11871.0,
+          "roi": 2.52,
+          "hours": 4.5
+        },
+        {
+          "name": "杨琼",
+          "gmv": 17169.0,
+          "spend": 6416.0,
+          "roi": 2.68,
+          "hours": 4.5
+        },
+        {
+          "name": "孙玉洁",
+          "gmv": 31523.0,
+          "spend": 11957.0,
+          "roi": 2.64,
+          "hours": 4.5
+        }
+      ]
+    },
+    {
+      "serial": 46284,
+      "date": "2026-09-19",
+      "anchors": [
+        {
+          "name": "查查",
+          "gmv": 30726.0,
+          "spend": 11384.0,
+          "roi": 2.7,
+          "hours": 4.5
+        },
+        {
+          "name": "杨琼",
+          "gmv": 23844.0,
+          "spend": 9227.0,
+          "roi": 2.58,
+          "hours": 4.5
+        },
+        {
+          "name": "孙玉洁",
+          "gmv": 30795.0,
+          "spend": 11988.0,
+          "roi": 2.57,
+          "hours": 4.5
+        },
+        {
+          "name": "范范",
+          "gmv": 26342.0,
+          "spend": 8796.0,
+          "roi": 2.99,
+          "hours": 4.5
+        }
+      ]
     }
   ],
   "postalMonthly": {
-    "gmv": 1468.4,
-    "spend": 430.81,
-    "roi": 3.41
+    "gmv": 1558.3,
+    "spend": 479.35,
+    "roi": 3.25
   },
   "videoMonthly": {
-    "gmv": 35829.3,
-    "spend": 14214.82,
-    "roi": 2.52
+    "gmv": 38017.1,
+    "spend": 14854.04,
+    "roi": 2.56
   },
   "organicMonthly": {
-    "gmv": 24387.7,
-    "spend": 10407.91,
-    "roi": 2.34
+    "gmv": 31101.2,
+    "spend": 13566.0,
+    "roi": 2.29
   },
   "targetGmv": 3200000,
   "targetRoi": 3,
   "funnel": {
-    "exposure": 256074.0,
-    "views": 22286.0,
-    "prod_exposure": 19513.0,
-    "prod_click": 5824.0,
-    "buyers": 1001.0,
-    "exposure_count": 526873.0,
-    "watch_count": 39242.0,
-    "comments": 1688.0,
-    "new_live_group": 4.0,
-    "new_fans": 334.0,
-    "new_shopping_group": 6.0,
-    "avg_stay_min": 1.48,
-    "rate_view": 8.7,
-    "rate_prod_exposure": 87.56,
-    "rate_click": 29.85,
-    "rate_buy": 17.19,
-    "rate_total": 0.39,
-    "rate_watch_buy": 2.55,
-    "interactions": 2032.0,
-    "rate_watch_view_times": 7.45,
-    "rate_watch_interaction": 5.18,
-    "rate_exposure_interaction": 0.39,
-    "date": "20260917"
+    "exposure": 253177.0,
+    "views": 23547.0,
+    "prod_exposure": 21206.0,
+    "prod_click": 6237.0,
+    "buyers": 1052.0,
+    "exposure_count": 544844.0,
+    "watch_count": 41932.0,
+    "comments": 1440.0,
+    "new_live_group": 3.0,
+    "new_fans": 314.0,
+    "new_shopping_group": 0.0,
+    "avg_stay_min": 1.38,
+    "rate_view": 9.3,
+    "rate_prod_exposure": 90.06,
+    "rate_click": 29.41,
+    "rate_buy": 16.87,
+    "rate_total": 0.42,
+    "rate_watch_buy": 2.51,
+    "interactions": 1757.0,
+    "rate_watch_view_times": 7.7,
+    "rate_watch_interaction": 4.19,
+    "rate_exposure_interaction": 0.32,
+    "date": "20260919"
   },
   "funnelPrev": {
-    "exposure": 213135.0,
-    "views": 18846.0,
-    "prod_exposure": 16700.0,
-    "prod_click": 4696.0,
-    "buyers": 869.0,
-    "exposure_count": 453951.0,
-    "watch_count": 33319.0,
-    "comments": 1751.0,
+    "exposure": 303089.0,
+    "views": 25494.0,
+    "prod_exposure": 22883.0,
+    "prod_click": 6227.0,
+    "buyers": 1034.0,
+    "exposure_count": 557199.0,
+    "watch_count": 42431.0,
+    "comments": 1668.0,
     "new_live_group": 0.0,
-    "new_fans": 248.0,
+    "new_fans": 346.0,
     "new_shopping_group": 1.0,
-    "avg_stay_min": 1.67,
-    "rate_view": 8.84,
-    "rate_prod_exposure": 88.61,
-    "rate_click": 28.12,
-    "rate_buy": 18.51,
-    "rate_total": 0.41,
-    "rate_watch_buy": 2.61,
-    "interactions": 2000.0,
-    "rate_watch_view_times": 7.34,
-    "rate_watch_interaction": 6.0,
-    "rate_exposure_interaction": 0.44,
-    "date": "20260916"
+    "avg_stay_min": 1.52,
+    "rate_view": 8.41,
+    "rate_prod_exposure": 89.76,
+    "rate_click": 27.21,
+    "rate_buy": 16.61,
+    "rate_total": 0.34,
+    "rate_watch_buy": 2.44,
+    "interactions": 2015.0,
+    "rate_watch_view_times": 7.62,
+    "rate_watch_interaction": 4.75,
+    "rate_exposure_interaction": 0.36,
+    "date": "20260918"
   },
   "liveHistory": [
     {
@@ -8839,9 +8948,66 @@
       "refund_amount": 14806.93,
       "new_shopping_group": 6.0,
       "cost": 39036.83
+    },
+    {
+      "date": "2026-09-18",
+      "exposure": 173934.0,
+      "exposure_count": 337482.0,
+      "views": 15263.0,
+      "watch_count": 26510.0,
+      "avg_stay_min": 1.52,
+      "comments": 1072.0,
+      "new_live_group": 0,
+      "new_fans": 235.0,
+      "prod_exposure": 13810.0,
+      "prod_click": 3784.0,
+      "gmv": 70414.39,
+      "hourly_gmv": 5529.14281430392,
+      "buyers": 657.0,
+      "refund_amount": 9253.83,
+      "new_shopping_group": 1.0,
+      "cost": 26411.76
+    },
+    {
+      "date": "2026-09-18",
+      "exposure": 129155.0,
+      "exposure_count": 219717.0,
+      "views": 10231.0,
+      "watch_count": 15921.0,
+      "avg_stay_min": 1.21,
+      "comments": 596.0,
+      "new_live_group": 0,
+      "new_fans": 111.0,
+      "prod_exposure": 9073.0,
+      "prod_click": 2443.0,
+      "gmv": 38118.93,
+      "hourly_gmv": 5015.863365352766,
+      "buyers": 377.0,
+      "refund_amount": 5168.94,
+      "new_shopping_group": 0,
+      "cost": 14899.62
+    },
+    {
+      "date": "2026-09-19",
+      "exposure": 253177.0,
+      "exposure_count": 544844.0,
+      "views": 23547.0,
+      "watch_count": 41932.0,
+      "avg_stay_min": 1.38,
+      "comments": 1440.0,
+      "new_live_group": 3.0,
+      "new_fans": 314.0,
+      "prod_exposure": 21206.0,
+      "prod_click": 6237.0,
+      "gmv": 111707.06,
+      "hourly_gmv": 5393.523219241443,
+      "buyers": 1052.0,
+      "refund_amount": 13202.06,
+      "new_shopping_group": 0,
+      "cost": 41401.81
     }
   ],
-  "fetchedAt": "2026-09-18 09:27:25",
+  "fetchedAt": "2026-09-20 09:33:33",
   "food": {
     "knownDays": [
       {
@@ -12743,83 +12909,113 @@
         "card": 4571.8,
         "other": 4657.6,
         "graphic": 0.0
+      },
+      {
+        "date": "2026-09-18",
+        "day": 18,
+        "dv": 25717.0,
+        "sp": 10207.46,
+        "duration": 13.0,
+        "gsv": null,
+        "hourly": 1978.23,
+        "roi": 2.52,
+        "live": 11832.5,
+        "short_video": 2362.1,
+        "card": 4527.4,
+        "other": 6995.0,
+        "graphic": 0.0
+      },
+      {
+        "date": "2026-09-19",
+        "day": 19,
+        "dv": 33697.6,
+        "sp": 13958.62,
+        "duration": 13.55,
+        "gsv": null,
+        "hourly": 2486.91,
+        "roi": 2.41,
+        "live": 19501.74,
+        "short_video": 4908.6,
+        "card": 4999.86,
+        "other": 4287.4,
+        "graphic": 0.0
       }
     ],
     "latest": {
-      "date": "2026-09-17",
-      "day": 17,
-      "b": 25730.43,
-      "c": 10343.35,
-      "d": 13340.23,
-      "e": 3160.8,
-      "f": 4571.8,
-      "g": 4657.6,
+      "date": "2026-09-19",
+      "day": 19,
+      "b": 33697.6,
+      "c": 13958.62,
+      "d": 19501.74,
+      "e": 4908.6,
+      "f": 4999.86,
+      "g": 4287.4,
       "h": 0.0,
-      "duration": 9.02,
-      "hourly": 2852.6,
+      "duration": 13.55,
+      "hourly": 2486.91,
       "gsv": null,
-      "roi": 2.49
+      "roi": 2.41
     },
     "targetGmv": 880000.0,
     "targetGsv": 720000.0,
-    "gapGmv": 378260.75,
+    "gapGmv": 318846.15,
     "gapGsv": 720000.0,
     "monthly": {
-      "gmv": 501739.25,
-      "spend": 212237.27,
+      "gmv": 561153.85,
+      "spend": 236403.35,
       "gsv": 0.0,
-      "duration": 193.72,
-      "roi": 2.36
+      "duration": 220.27,
+      "roi": 2.37
     },
     "funnel": {
-      "exposure": 40385.0,
-      "exposure_count": 69967.0,
-      "views": 4283.0,
-      "watch_count": 6442.0,
-      "prod_exposure": 3771.0,
-      "prod_click": 1197.0,
-      "buyers": 159.0,
-      "comments": 405.0,
+      "exposure": 62778.0,
+      "exposure_count": 113109.0,
+      "views": 6196.0,
+      "watch_count": 9266.0,
+      "prod_exposure": 5418.0,
+      "prod_click": 1701.0,
+      "buyers": 239.0,
+      "comments": 537.0,
       "new_live_group": 0.0,
-      "new_fans": 44.0,
+      "new_fans": 53.0,
       "new_shopping_group": 1.0,
-      "avg_stay_min": 2.9,
-      "rate_view": 10.61,
-      "rate_prod_exposure": 88.05,
-      "rate_click": 31.74,
-      "rate_buy": 13.28,
-      "rate_total": 0.39,
-      "rate_watch_buy": 2.47,
-      "interactions": 450.0,
-      "rate_watch_view_times": 9.21,
-      "rate_watch_interaction": 6.99,
-      "rate_exposure_interaction": 0.64,
-      "date": "20260917"
+      "avg_stay_min": 2.4,
+      "rate_view": 9.87,
+      "rate_prod_exposure": 87.44,
+      "rate_click": 31.4,
+      "rate_buy": 14.05,
+      "rate_total": 0.38,
+      "rate_watch_buy": 2.58,
+      "interactions": 591.0,
+      "rate_watch_view_times": 8.19,
+      "rate_watch_interaction": 6.38,
+      "rate_exposure_interaction": 0.52,
+      "date": "20260919"
     },
     "funnelPrev": {
-      "exposure": 54125.0,
-      "exposure_count": 92611.0,
-      "views": 5388.0,
-      "watch_count": 8155.0,
-      "prod_exposure": 4876.0,
-      "prod_click": 1637.0,
-      "buyers": 235.0,
-      "comments": 320.0,
+      "exposure": 49409.0,
+      "exposure_count": 82615.0,
+      "views": 4839.0,
+      "watch_count": 7223.0,
+      "prod_exposure": 4300.0,
+      "prod_click": 1196.0,
+      "buyers": 143.0,
+      "comments": 325.0,
       "new_live_group": 0.0,
-      "new_fans": 39.0,
+      "new_fans": 47.0,
       "new_shopping_group": 0.0,
-      "avg_stay_min": 2.36,
-      "rate_view": 9.95,
-      "rate_prod_exposure": 90.5,
-      "rate_click": 33.57,
-      "rate_buy": 14.36,
-      "rate_total": 0.43,
-      "rate_watch_buy": 2.88,
-      "interactions": 359.0,
-      "rate_watch_view_times": 8.81,
-      "rate_watch_interaction": 4.4,
-      "rate_exposure_interaction": 0.39,
-      "date": "20260916"
+      "avg_stay_min": 3.5,
+      "rate_view": 9.79,
+      "rate_prod_exposure": 88.86,
+      "rate_click": 27.81,
+      "rate_buy": 11.96,
+      "rate_total": 0.29,
+      "rate_watch_buy": 1.98,
+      "interactions": 372.0,
+      "rate_watch_view_times": 8.74,
+      "rate_watch_interaction": 5.15,
+      "rate_exposure_interaction": 0.45,
+      "date": "20260918"
     },
     "liveHistory": [
       {
@@ -17041,22 +17237,129 @@
         "refund_amount": 815.96,
         "new_shopping_group": 1.0,
         "cost": 2633.92
+      },
+      {
+        "date": "2026-09-18",
+        "duration": 4.5,
+        "exposure": 18195.0,
+        "exposure_count": 31463.0,
+        "views": 2051.0,
+        "watch_count": 3199.0,
+        "avg_stay_min": 1.52,
+        "comments": 203.0,
+        "new_live_group": 0,
+        "new_fans": 22.0,
+        "prod_exposure": 1947.0,
+        "prod_click": 528.0,
+        "gmv": 5778.08,
+        "hourly_gmv": 1024.6914342137743,
+        "buyers": 69.0,
+        "refund_amount": 605.87,
+        "new_shopping_group": 0,
+        "cost": 3046.28
+      },
+      {
+        "date": "2026-09-18",
+        "duration": 5.7,
+        "exposure": 23401.0,
+        "exposure_count": 38994.0,
+        "views": 2013.0,
+        "watch_count": 2961.0,
+        "avg_stay_min": 0.81,
+        "comments": 66.0,
+        "new_live_group": 0,
+        "new_fans": 18.0,
+        "prod_exposure": 1718.0,
+        "prod_click": 513.0,
+        "gmv": 4791.02,
+        "hourly_gmv": 693.0928015564201,
+        "buyers": 59.0,
+        "refund_amount": 161.82,
+        "new_shopping_group": 0,
+        "cost": 2400.94
+      },
+      {
+        "date": "2026-09-18",
+        "duration": 2.8,
+        "exposure": 7813.0,
+        "exposure_count": 12158.0,
+        "views": 775.0,
+        "watch_count": 1063.0,
+        "avg_stay_min": 1.17,
+        "comments": 56.0,
+        "new_live_group": 0,
+        "new_fans": 7.0,
+        "prod_exposure": 635.0,
+        "prod_click": 155.0,
+        "gmv": 1193.5,
+        "hourly_gmv": 376.36914545994654,
+        "buyers": 15.0,
+        "refund_amount": 220.7,
+        "new_shopping_group": 0,
+        "cost": 539.44
+      },
+      {
+        "date": "2026-09-19",
+        "duration": 9.033333333333333,
+        "exposure": 47490.0,
+        "exposure_count": 86759.0,
+        "views": 4447.0,
+        "watch_count": 6660.0,
+        "avg_stay_min": 1.2,
+        "comments": 411.0,
+        "new_live_group": 0,
+        "new_fans": 38.0,
+        "prod_exposure": 3894.0,
+        "prod_click": 1277.0,
+        "gmv": 14055.38,
+        "hourly_gmv": 1266.5196937551887,
+        "buyers": 175.0,
+        "refund_amount": 1057.51,
+        "new_shopping_group": 0,
+        "cost": 7211.11
+      },
+      {
+        "date": "2026-09-19",
+        "duration": 4.516666666666667,
+        "exposure": 15288.0,
+        "exposure_count": 26350.0,
+        "views": 1749.0,
+        "watch_count": 2606.0,
+        "avg_stay_min": 1.2,
+        "comments": 126.0,
+        "new_live_group": 0,
+        "new_fans": 15.0,
+        "prod_exposure": 1524.0,
+        "prod_click": 424.0,
+        "gmv": 5418.4,
+        "hourly_gmv": 921.3302211302212,
+        "buyers": 64.0,
+        "refund_amount": 541.81,
+        "new_shopping_group": 1.0,
+        "cost": 2519.79
       }
     ],
     "anchors": [
       {
-        "name": "陶涛",
-        "gmv": 5532.0,
-        "spend": 2633.78,
-        "roi": 2.1,
+        "name": "田雨琪",
+        "gmv": 5418.0,
+        "spend": 2518.0,
+        "roi": 2.15,
         "hours": 4.5
       },
       {
-        "name": "田雨琪",
-        "gmv": 7737.0,
-        "spend": 3826.0,
-        "roi": 2.02,
-        "hours": 4.4
+        "name": "陈梦婷",
+        "gmv": 5327.0,
+        "spend": 3070.89,
+        "roi": 1.73,
+        "hours": 4.5
+      },
+      {
+        "name": "陶涛",
+        "gmv": 8728.0,
+        "spend": 4136.5,
+        "roi": 2.11,
+        "hours": 4.5
       }
     ],
     "anchorHistory": [
@@ -20107,6 +20410,60 @@
             "spend": 3826.0,
             "roi": 2.02,
             "hours": 4.4
+          }
+        ]
+      },
+      {
+        "serial": 46283,
+        "date": "2026-09-18",
+        "anchors": [
+          {
+            "name": "陶涛",
+            "gmv": 5778.0,
+            "spend": 3046.0,
+            "roi": 1.9,
+            "hours": 4.5
+          },
+          {
+            "name": "田雨琪",
+            "gmv": 1937.0,
+            "spend": 845.79,
+            "roi": 2.29,
+            "hours": 4.4
+          },
+          {
+            "name": "陈梦婷",
+            "gmv": 3977.0,
+            "spend": 2093.47,
+            "roi": 1.9,
+            "hours": 4.5
+          }
+        ]
+      },
+      {
+        "serial": 46284,
+        "date": "2026-09-19",
+        "anchors": [
+          {
+            "name": "田雨琪",
+            "gmv": 5418.0,
+            "spend": 2518.0,
+            "roi": 2.15,
+            "hours": 4.5
+          },
+          {
+            "name": "陈梦婷",
+            "gmv": 5327.0,
+            "spend": 3070.89,
+            "roi": 1.73,
+            "hours": 4.5
+          },
+          {
+            "name": "陶涛",
+            "gmv": 8728.0,
+            "spend": 4136.5,
+            "roi": 2.11,
+            "hours": 4.5
           }
         ]
       }
