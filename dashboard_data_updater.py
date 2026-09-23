@@ -255,6 +255,14 @@ def fetch_anchor_history():
     return history
 
 
+def named_value(row, header, name, default=0):
+    """Read a value by column name so added/reordered source columns cannot shift data."""
+    for index, column in enumerate(header):
+        if str(column or "").strip() == name:
+            return row[index] if index < len(row) else default
+    return default
+
+
 def build_funnel_from_workbook(path):
     """从指定直播明细 Excel 提取漏斗数据；无有效曝光时返回 None。"""
     try:
@@ -267,20 +275,22 @@ def build_funnel_from_workbook(path):
             "new_live_group": 0.0, "new_fans": 0.0, "new_shopping_group": 0.0,
             "avg_stay_min": 0.0,
         }
-        for row in ws.iter_rows(min_row=2, values_only=True):
-            if row and row[1] == "阴山优麦冲饮旗舰店":
-                f["exposure"] += float(row[6] or 0)
-                f["exposure_count"] += float(row[7] or 0)
-                f["views"] += float(row[8] or 0)
-                f["watch_count"] += float(row[10] or 0)
-                f["prod_exposure"] += float(row[20] or 0)
-                f["prod_click"] += float(row[21] or 0)
-                f["buyers"] += float(row[29] or 0)
-                f["comments"] += float(row[14] or 0)
-                f["new_live_group"] += float(row[15] or 0)
-                f["new_fans"] += float(row[16] or 0)
-                f["new_shopping_group"] += float(row[42] or 0)
-                f["avg_stay_min"] = max(f["avg_stay_min"], float(row[13] or 0))
+        rows = ws.iter_rows(values_only=True)
+        header = next(rows, ())
+        for row in rows:
+            if row and named_value(row, header, "主播昵称", None) == "阴山优麦冲饮旗舰店":
+                f["exposure"] += float(named_value(row, header, "直播间曝光人数") or 0)
+                f["exposure_count"] += float(named_value(row, header, "直播间曝光次数") or 0)
+                f["views"] += float(named_value(row, header, "直播间观看人数") or 0)
+                f["watch_count"] += float(named_value(row, header, "直播间观看次数") or 0)
+                f["prod_exposure"] += float(named_value(row, header, "直播间商品曝光人数") or 0)
+                f["prod_click"] += float(named_value(row, header, "直播间商品点击人数") or 0)
+                f["buyers"] += float(named_value(row, header, "直播间成交人数") or 0)
+                f["comments"] += float(named_value(row, header, "评论次数") or 0)
+                f["new_live_group"] += float(named_value(row, header, "新加直播团人数") or 0)
+                f["new_fans"] += float(named_value(row, header, "新增粉丝数") or 0)
+                f["new_shopping_group"] += float(named_value(row, header, "新加购物团人数") or 0)
+                f["avg_stay_min"] = max(f["avg_stay_min"], float(named_value(row, header, "人均观看时长(分钟)") or 0))
         wb.close()
         if f["exposure"] <= 0:
             return None
@@ -354,33 +364,34 @@ def fetch_live_history():
     values = lark_read(TOKEN, "cC79qR!A1:BB1000")
     if not values:
         return []
+    header = values[0]
     records = []
     for row in values[1:]:
-        if not row or len(row) < 44:
+        if not row:
             continue
-        if str(row[1] or "").strip() != "阴山优麦冲饮旗舰店":
+        if str(named_value(row, header, "主播昵称", "") or "").strip() != "阴山优麦冲饮旗舰店":
             continue
-        dstr = parse_live_date(row[3])
+        dstr = parse_live_date(named_value(row, header, "直播开始时间"))
         if not dstr:
             continue
         records.append({
             "date": dstr,
-            "exposure": pn(row[6]) or 0,
-            "exposure_count": pn(row[7]) or 0,
-            "views": pn(row[8]) or 0,
-            "watch_count": pn(row[10]) or 0,
-            "avg_stay_min": pn(row[13]) or 0,
-            "comments": pn(row[14]) or 0,
-            "new_live_group": pn(row[15]) or 0,
-            "new_fans": pn(row[16]) or 0,
-            "prod_exposure": pn(row[20]) or 0,
-            "prod_click": pn(row[21]) or 0,
-            "gmv": pn(row[25]) or 0,
-            "hourly_gmv": pn(row[27]) or 0,
-            "buyers": pn(row[29]) or 0,
-            "refund_amount": pn(row[31]) or 0,
-            "new_shopping_group": pn(row[42]) or 0,
-            "cost": pn(row[43]) or 0,
+            "exposure": pn(named_value(row, header, "直播间曝光人数")) or 0,
+            "exposure_count": pn(named_value(row, header, "直播间曝光次数")) or 0,
+            "views": pn(named_value(row, header, "直播间观看人数")) or 0,
+            "watch_count": pn(named_value(row, header, "直播间观看次数")) or 0,
+            "avg_stay_min": pn(named_value(row, header, "人均观看时长(分钟)")) or 0,
+            "comments": pn(named_value(row, header, "评论次数")) or 0,
+            "new_live_group": pn(named_value(row, header, "新加直播团人数")) or 0,
+            "new_fans": pn(named_value(row, header, "新增粉丝数")) or 0,
+            "prod_exposure": pn(named_value(row, header, "直播间商品曝光人数")) or 0,
+            "prod_click": pn(named_value(row, header, "直播间商品点击人数")) or 0,
+            "gmv": pn(named_value(row, header, "直播间成交金额")) or 0,
+            "hourly_gmv": pn(named_value(row, header, "单小时用户支付金额")) or 0,
+            "buyers": pn(named_value(row, header, "直播间成交人数")) or 0,
+            "refund_amount": pn(named_value(row, header, "直播间退款金额")) or 0,
+            "new_shopping_group": pn(named_value(row, header, "新加购物团人数")) or 0,
+            "cost": pn(named_value(row, header, "投放消耗(店铺绑定)")) or 0,
         })
     records.sort(key=lambda r: r["date"])
     return records
@@ -464,37 +475,38 @@ def fetch_food_summary():
 
 def fetch_food_live_history():
     """从 weIxvN 读取阴山优麦食品旗舰店直播明细。"""
-    values = lark_read(TOKEN, f"{FOOD_LIVE_SHEET}!A2:BB1000", identity="user", timeout=30)
+    values = lark_read(TOKEN, f"{FOOD_LIVE_SHEET}!A1:BB1000", identity="user", timeout=30)
     if not values:
         return []
+    header = values[0]
     records = []
-    for row in values:
-        if not row or len(row) < 44:
+    for row in values[1:]:
+        if not row:
             continue
-        if str(row[1] or "").strip() != "阴山优麦食品旗舰店":
+        if str(named_value(row, header, "主播昵称", "") or "").strip() != "阴山优麦食品旗舰店":
             continue
-        dstr = parse_live_date(row[3])
+        dstr = parse_live_date(named_value(row, header, "直播开始时间"))
         if not dstr:
             continue
         records.append({
             "date": dstr,
-            "duration": pn(row[5]) / 60 if pn(row[5]) else 0,
-            "exposure": pn(row[6]) or 0,
-            "exposure_count": pn(row[7]) or 0,
-            "views": pn(row[8]) or 0,
-            "watch_count": pn(row[10]) or 0,
-            "avg_stay_min": pn(row[13]) or 0,
-            "comments": pn(row[14]) or 0,
-            "new_live_group": pn(row[15]) or 0,
-            "new_fans": pn(row[16]) or 0,
-            "prod_exposure": pn(row[20]) or 0,
-            "prod_click": pn(row[21]) or 0,
-            "gmv": pn(row[25]) or 0,
-            "hourly_gmv": pn(row[27]) or 0,
-            "buyers": pn(row[29]) or 0,
-            "refund_amount": pn(row[31]) or 0,
-            "new_shopping_group": pn(row[42]) or 0,
-            "cost": pn(row[43]) or 0,
+            "duration": (pn(named_value(row, header, "直播时长(分钟)")) or 0) / 60,
+            "exposure": pn(named_value(row, header, "直播间曝光人数")) or 0,
+            "exposure_count": pn(named_value(row, header, "直播间曝光次数")) or 0,
+            "views": pn(named_value(row, header, "直播间观看人数")) or 0,
+            "watch_count": pn(named_value(row, header, "直播间观看次数")) or 0,
+            "avg_stay_min": pn(named_value(row, header, "人均观看时长(分钟)")) or 0,
+            "comments": pn(named_value(row, header, "评论次数")) or 0,
+            "new_live_group": pn(named_value(row, header, "新加直播团人数")) or 0,
+            "new_fans": pn(named_value(row, header, "新增粉丝数")) or 0,
+            "prod_exposure": pn(named_value(row, header, "直播间商品曝光人数")) or 0,
+            "prod_click": pn(named_value(row, header, "直播间商品点击人数")) or 0,
+            "gmv": pn(named_value(row, header, "直播间成交金额")) or 0,
+            "hourly_gmv": pn(named_value(row, header, "单小时用户支付金额")) or 0,
+            "buyers": pn(named_value(row, header, "直播间成交人数")) or 0,
+            "refund_amount": pn(named_value(row, header, "直播间退款金额")) or 0,
+            "new_shopping_group": pn(named_value(row, header, "新加购物团人数")) or 0,
+            "cost": pn(named_value(row, header, "投放消耗(店铺绑定)")) or 0,
         })
     records.sort(key=lambda r: r["date"])
     return records
