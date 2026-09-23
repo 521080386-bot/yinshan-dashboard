@@ -317,11 +317,26 @@ def build_funnel_from_workbook(path):
         return None
 
 
+def latest_live_excel_files(limit=2):
+    """Return the newest file per business date, preferring the latest modified copy."""
+    base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), DRINK_DATA_DIR)
+    files = glob.glob(os.path.join(base_dir, "直播明细_全部账号_*.xlsx"))
+    by_date = {}
+    for path in files:
+        match = re.search(r"(\d{8})_", os.path.basename(path))
+        if not match:
+            continue
+        business_date = match.group(1)
+        if business_date not in by_date or os.path.getmtime(path) > os.path.getmtime(by_date[business_date]):
+            by_date[business_date] = path
+    dates = sorted(by_date.keys())
+    return [by_date[value] for value in dates[-limit:]]
+
+
 def fetch_funnel_from_excel():
     """取冲饮店最新一份直播明细 Excel 的漏斗数据。"""
     try:
-        base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), DRINK_DATA_DIR)
-        files = sorted(glob.glob(os.path.join(base_dir, "直播明细_全部账号_*.xlsx")))
+        files = latest_live_excel_files(1)
         if not files:
             return None
         return build_funnel_from_workbook(files[-1])
@@ -333,11 +348,10 @@ def fetch_funnel_from_excel():
 def fetch_prev_funnel_from_excel():
     """取冲饮店倒数第二份直播明细 Excel 的昨日漏斗数据。"""
     try:
-        base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), DRINK_DATA_DIR)
-        files = sorted(glob.glob(os.path.join(base_dir, "直播明细_全部账号_*.xlsx")))
+        files = latest_live_excel_files(2)
         if len(files) < 2:
             return None
-        return build_funnel_from_workbook(files[-2])
+        return build_funnel_from_workbook(files[0])
     except Exception as e:
         print(f"[warn] prev funnel excel: {e}", file=sys.stderr)
         return None
