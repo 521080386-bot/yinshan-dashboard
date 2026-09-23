@@ -145,7 +145,7 @@ def parse_date_cell(value):
 def parse_anchor_block(values, start_idx):
     """Parse one 5-row anchor block starting at start_idx. Returns list of anchors."""
     anchors = []
-    for col_offset in (1, 3, 5, 7):  # B, D, F, H
+    for col_offset in (1, 3, 5, 7, 9):  # B, D, F, H, J
         name_row = values[start_idx]
         if len(name_row) <= col_offset + 1:
             continue
@@ -191,7 +191,7 @@ def fetch_anchor_blocks():
     """读取 KFTIUP 全部日期块（FormattedValue 直接取公式计算值）。
     返回 {serial: anchors_list}，按日期升序。
     A 列在 FormattedValue 模式下可能是日期字符串（如 2026/03/15）或 serial 数字，均需兼容。"""
-    values = lark_read(HANDOFF, f"{HANDOFF_SHEET}!A:I", value_render="UnformattedValue")
+    values = lark_read(HANDOFF, f"{HANDOFF_SHEET}!A:K", value_render="UnformattedValue")
     if not values:
         return {}
 
@@ -217,7 +217,8 @@ def fetch_anchor_blocks():
         if serial is not None and serial > 0 and i + 4 < len(values):
             anchors = parse_anchor_block(values, i)
             if anchors:
-                blocks[serial] = anchors
+                # KFTIUP 的 A 列记录交班日，业绩归属前一天。
+                blocks[serial + 1] = anchors
             i += 5
         else:
             i += 1
