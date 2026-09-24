@@ -217,8 +217,7 @@ def fetch_anchor_blocks():
         if serial is not None and serial > 0 and i + 4 < len(values):
             anchors = parse_anchor_block(values, i)
             if anchors:
-                # KFTIUP 的 A 列记录交班日，业绩归属前一天。
-                blocks[serial + 1] = anchors
+                blocks[serial] = anchors
             i += 5
         else:
             i += 1
