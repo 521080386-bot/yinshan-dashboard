@@ -29,6 +29,10 @@ DRINK_DATA_DIR = "阴山冲饮数据明细"
 FOOD_LIVE_SHEET = "weIxvN"
 REPORT_MONTH_START = date(2026, 9, 1)
 
+# 当月目标（业务确认后手动更新）：2026-10 冲饮店 GMV 250 万、食品店 GMV 85 万
+DRINK_TARGET_GMV = 2_500_000
+FOOD_TARGET_GMV = 850_000
+
 def lark_read(token, range_expr, value_render=None, identity="bot", timeout=15):
     cmd = [LARK_CLI, "sheets", "+read", "--as", identity,
            "--spreadsheet-token", token,
@@ -416,7 +420,7 @@ def default_food():
     return {
         "knownDays": [],
         "latest": {"day": 0, "b": None, "c": None, "d": None, "e": None, "f": None, "g": None, "h": None, "date": None},
-        "targetGmv": 880000,
+        "targetGmv": FOOD_TARGET_GMV,
         "targetGsv": 720000,
         "monthly": {"gmv": 0, "spend": 0, "gsv": 0, "duration": 0, "roi": 0},
         "funnel": None,
@@ -702,9 +706,9 @@ def fetch_food_data():
     return {
         "knownDays": known,
         "latest": latest_obj,
-        "targetGmv": targets.get("targetGmv") or 880000,
+        "targetGmv": FOOD_TARGET_GMV,
         "targetGsv": targets.get("targetGsv") or 720000,
-        "gapGmv": rounded((targets.get("targetGmv") or 880000) - monthly["gmv"], 2),
+        "gapGmv": rounded(FOOD_TARGET_GMV - monthly["gmv"], 2),
         "gapGsv": rounded((targets.get("targetGsv") or 720000) - monthly["gsv"], 2),
         "monthly": monthly,
         "funnel": funnel,
@@ -841,7 +845,7 @@ def fetch_data():
         "spend": rounded(organic_spend, 2),
         "roi": rounded(organic_gmv / organic_spend, 2) if organic_spend else 0,
     }
-    out["targetGmv"] = 3200000
+    out["targetGmv"] = DRINK_TARGET_GMV
     out["targetRoi"] = 3
     # 漏斗数据：优先本地 Excel（最新日期）；CI 云端无 Excel 时保留上一版值
     funnel = fetch_funnel_from_excel()
