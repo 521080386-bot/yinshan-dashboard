@@ -29,8 +29,8 @@ DRINK_DATA_DIR = "阴山冲饮数据明细"
 FOOD_LIVE_SHEET = "weIxvN"
 REPORT_MONTH_START = date(2026, 9, 1)
 
-# 当月目标（业务确认后手动更新）：2026-10 冲饮店 GMV 250 万、食品店 GMV 85 万
-DRINK_TARGET_GMV = 2_500_000
+# 当月目标（业务确认后手动更新）：2026-10 冲饮店 GMV 350 万、食品店 GMV 85 万
+DRINK_TARGET_GMV = 3_500_000
 FOOD_TARGET_GMV = 850_000
 
 def lark_read(token, range_expr, value_render=None, identity="bot", timeout=15):
