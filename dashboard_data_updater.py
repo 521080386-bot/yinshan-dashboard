@@ -146,6 +146,14 @@ def parse_date_cell(value):
     return None
 
 
+def current_month_start(date_strings):
+    """当月起始日：按最新数据日期所在月份计算（YYYY-MM-01），月初自动重置。"""
+    valid = sorted(d for d in date_strings if d)
+    if not valid:
+        return REPORT_MONTH_START.isoformat()
+    return valid[-1][:7] + "-01"
+
+
 def parse_anchor_block(values, start_idx):
     """Parse one 5-row anchor block starting at start_idx. Returns list of anchors."""
     anchors = []
@@ -689,7 +697,7 @@ def fetch_food_data():
             funnel = build_food_funnel([r for r in live if r["date"] == dates[-1]])
             if len(dates) > 1:
                 funnel_prev = build_food_funnel([r for r in live if r["date"] == dates[-2]])
-    month_start = REPORT_MONTH_START.isoformat()
+    month_start = current_month_start([d.get("date") for d in known])
     month_days = [d for d in known if d["date"] and d["date"] >= month_start]
     monthly = {
         "gmv": rounded(sum(d["dv"] for d in month_days), 2),
@@ -820,9 +828,17 @@ def fetch_data():
     out["anchorHistory"] = fetch_anchor_history()
 
     # 月度汇总：从 UUAtO2 每日 J/K（低GI视频号）与 M/N（冲饮视频号）汇总并计算 ROI
+    data_dates = []
+    for row in rows:
+        if not row or not any(v not in (None, "") for v in row[1:]):
+            continue
+        d = parse_date_cell(row[0])
+        if d:
+            data_dates.append(d)
+    month_start = current_month_start(data_dates)
     month_rows = [
         row for row in rows
-        if (d := parse_date_cell(row[0] if row else None)) and d >= REPORT_MONTH_START.isoformat()
+        if (d := parse_date_cell(row[0] if row else None)) and d >= month_start
     ]
     low_gmv = sum(pn(r[9]) or 0 for r in month_rows if len(r) > 9)
     low_spend = sum(pn(r[10]) or 0 for r in month_rows if len(r) > 10)
