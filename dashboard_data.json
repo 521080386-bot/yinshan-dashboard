@@ -9346,31 +9346,10 @@
       "date": "2026-10-23",
       "anchors": [
         {
-          "name": "杨琼",
-          "gmv": 20225.0,
-          "spend": 8414.0,
-          "roi": 2.4,
-          "hours": 4.5
-        },
-        {
-          "name": "张铭",
-          "gmv": 18986.0,
-          "spend": 7102.0,
-          "roi": 2.67,
-          "hours": 4.5
-        },
-        {
-          "name": "范娇丽",
-          "gmv": 21025.0,
-          "spend": 8537.0,
-          "roi": 2.46,
-          "hours": 4.5
-        },
-        {
           "name": "沈红映",
-          "gmv": 29804.0,
-          "spend": 10223.0,
-          "roi": 2.92,
+          "gmv": 23654.0,
+          "spend": 8912.0,
+          "roi": 2.65,
           "hours": 4.5
         }
       ]
@@ -11717,6 +11696,44 @@
       "cost": 35301.08
     },
     {
+      "date": "2026-10-15",
+      "exposure": 208628.0,
+      "exposure_count": 539492.0,
+      "views": 22642.0,
+      "watch_count": 43363.0,
+      "avg_stay_min": 1.87,
+      "comments": 2386.0,
+      "new_live_group": 3.0,
+      "new_fans": 348.0,
+      "prod_exposure": 20024.0,
+      "prod_click": 6336.0,
+      "gmv": 112430.0,
+      "hourly_gmv": 4211.37,
+      "buyers": 1095.0,
+      "refund_amount": 18535.0,
+      "new_shopping_group": 4.0,
+      "cost": 41699.0
+    },
+    {
+      "date": "2026-10-16",
+      "exposure": 164239.0,
+      "exposure_count": 424707.0,
+      "views": 17825.0,
+      "watch_count": 34137.0,
+      "avg_stay_min": 1.87,
+      "comments": 1879.0,
+      "new_live_group": 2.0,
+      "new_fans": 274.0,
+      "prod_exposure": 15764.0,
+      "prod_click": 4988.0,
+      "gmv": 89909.0,
+      "hourly_gmv": 4211.37,
+      "buyers": 862.0,
+      "refund_amount": 14592.0,
+      "new_shopping_group": 4.0,
+      "cost": 32458.0
+    },
+    {
       "date": "2026-10-17",
       "exposure": 202014.0,
       "exposure_count": 470062.0,
@@ -11888,7 +11905,7 @@
       "cost": 39594.56
     }
   ],
-  "fetchedAt": "2026-10-26 09:28:58",
+  "fetchedAt": "2026-10-26 13:04:08",
   "food": {
     "knownDays": [
       {
@@ -25713,6 +25730,26 @@
             "gmv": 7953.0,
             "spend": 3833.0,
             "roi": 2.07,
+            "hours": 4.5
+          }
+        ]
+      },
+      {
+        "serial": 46321,
+        "date": "2026-10-26",
+        "anchors": [
+          {
+            "name": "陈梦婷",
+            "gmv": 6690.0,
+            "spend": 3437.0,
+            "roi": 1.95,
+            "hours": 4.5
+          },
+          {
+            "name": "陈梦婷",
+            "gmv": 3955.0,
+            "spend": 2251.0,
+            "roi": 1.76,
             "hours": 4.5
           }
         ]
