@@ -1390,7 +1390,7 @@
     {
       "day": 25,
       "pg": 69.9,
-      "ps": 0
+      "ps": 28.9
     }
   ],
   "latest": {
@@ -1406,13 +1406,13 @@
   },
   "postal": {
     "gmv": 69.9,
-    "spend": 0,
-    "roi": 0
+    "spend": 28.9,
+    "roi": 2.42
   },
   "video": {
     "gmv": 1268.7,
-    "spend": 0,
-    "roi": 0
+    "spend": 577.93,
+    "roi": 2.2
   },
   "organic": {
     "gmv": 0,
@@ -9446,13 +9446,13 @@
   ],
   "postalMonthly": {
     "gmv": 2496.9,
-    "spend": 737.65,
-    "roi": 3.38
+    "spend": 771.64,
+    "roi": 3.24
   },
   "videoMonthly": {
     "gmv": 33806.2,
-    "spend": 14592.75,
-    "roi": 2.32
+    "spend": 15574.93,
+    "roi": 2.17
   },
   "organicMonthly": {
     "gmv": 67571.74,
@@ -11888,7 +11888,7 @@
       "cost": 39594.56
     }
   ],
-  "fetchedAt": "2026-10-26 09:19:11",
+  "fetchedAt": "2026-10-26 09:28:58",
   "food": {
     "knownDays": [
       {
