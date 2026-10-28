@@ -956,6 +956,17 @@
       "card": 9137.37,
       "other": 7566.63,
       "graphic": 0.0
+    },
+    {
+      "date": "2026-10-27",
+      "day": 27,
+      "dv": 111506.19,
+      "sp": 36244.84,
+      "live": 93548.70999999999,
+      "short_video": 1835.3,
+      "card": 8710.8,
+      "other": 7411.38,
+      "graphic": 0.0
     }
   ],
   "organicHistory": [
@@ -1182,6 +1193,13 @@
       "gmv": 6318.1,
       "spend": 2898.31,
       "roi": 2.18
+    },
+    {
+      "date": "2026-10-27",
+      "day": 27,
+      "gmv": 4581.1,
+      "spend": 2145.72,
+      "roi": 2.13
     }
   ],
   "postalHistory": [
@@ -1412,58 +1430,58 @@
     }
   ],
   "latest": {
-    "date": "2026-10-26",
-    "day": 26,
-    "b": 127767.87,
-    "c": 41506.43,
-    "d": 110545.06999999999,
-    "e": 518.8,
-    "f": 9137.37,
-    "g": 7566.63,
+    "date": "2026-10-27",
+    "day": 27,
+    "b": 111506.19,
+    "c": 36244.84,
+    "d": 93548.70999999999,
+    "e": 1835.3,
+    "f": 8710.8,
+    "g": 7411.38,
     "h": 0.0
   },
   "postal": {
     "gmv": 0,
-    "spend": 13.51,
+    "spend": 8.28,
     "roi": 0.0
   },
   "video": {
-    "gmv": 2047.9,
-    "spend": 709.61,
-    "roi": 2.89
+    "gmv": 869.1,
+    "spend": 711.29,
+    "roi": 1.22
   },
   "organic": {
-    "gmv": 6318.1,
-    "spend": 2898.31,
-    "roi": 2.18
+    "gmv": 4581.1,
+    "spend": 2145.72,
+    "roi": 2.13
   },
   "anchors": [
     {
-      "name": "沈红映",
-      "gmv": 23654.0,
-      "spend": 8912.0,
-      "roi": 2.65,
-      "hours": 4.5
-    },
-    {
       "name": "杨琼",
-      "gmv": 22708.0,
-      "spend": 8593.0,
-      "roi": 2.64,
+      "gmv": 25991.0,
+      "spend": 9756.0,
+      "roi": 2.66,
       "hours": 4.5
     },
     {
       "name": "张铭",
-      "gmv": 19901.0,
-      "spend": 7972.0,
-      "roi": 2.5,
+      "gmv": 18098.0,
+      "spend": 7346.0,
+      "roi": 2.46,
       "hours": 4.5
     },
     {
-      "name": "范娇丽",
-      "gmv": 44441.0,
-      "spend": 15436.0,
-      "roi": 2.88,
+      "name": "沈红映",
+      "gmv": 24196.0,
+      "spend": 9116.0,
+      "roi": 2.65,
+      "hours": 4.5
+    },
+    {
+      "name": "孙玉洁",
+      "gmv": 23872.0,
+      "spend": 8325.0,
+      "roi": 2.87,
       "hours": 4.5
     }
   ],
@@ -9505,28 +9523,74 @@
           "spend": 9756.0,
           "roi": 2.66,
           "hours": 4.5
+        },
+        {
+          "name": "张铭",
+          "gmv": 18098.0,
+          "spend": 7346.0,
+          "roi": 2.46,
+          "hours": 4.5
+        },
+        {
+          "name": "沈红映",
+          "gmv": 24196.0,
+          "spend": 9116.0,
+          "roi": 2.65,
+          "hours": 4.5
+        },
+        {
+          "name": "孙玉洁",
+          "gmv": 23872.0,
+          "spend": 8325.0,
+          "roi": 2.87,
+          "hours": 4.5
         }
       ]
     }
   ],
   "postalMonthly": {
-    "gmv": 2496.9,
-    "spend": 785.15,
-    "roi": 3.18
+    "gmv": 0.0,
+    "spend": 0.0,
+    "roi": 0
   },
   "videoMonthly": {
-    "gmv": 35854.1,
-    "spend": 16284.54,
-    "roi": 2.2
+    "gmv": 0.0,
+    "spend": 0.0,
+    "roi": 0
   },
   "organicMonthly": {
-    "gmv": 73889.84,
-    "spend": 32108.68,
-    "roi": 2.3
+    "gmv": 0.0,
+    "spend": 0.0,
+    "roi": 0
   },
   "targetGmv": 3500000,
   "targetRoi": 3,
   "funnel": {
+    "exposure": 194077.0,
+    "views": 21852.0,
+    "prod_exposure": 17836.0,
+    "prod_click": 5215.0,
+    "buyers": 916.0,
+    "exposure_count": 432437.0,
+    "watch_count": 38585.0,
+    "comments": 1291.0,
+    "new_live_group": 3.0,
+    "new_fans": 258.0,
+    "new_shopping_group": 4.0,
+    "avg_stay_min": 1.43,
+    "rate_view": 11.26,
+    "rate_prod_exposure": 81.62,
+    "rate_click": 29.24,
+    "rate_buy": 17.56,
+    "rate_total": 0.47,
+    "rate_watch_buy": 2.37,
+    "interactions": 1556.0,
+    "rate_watch_view_times": 8.92,
+    "rate_watch_interaction": 4.03,
+    "rate_exposure_interaction": 0.36,
+    "date": "20261027"
+  },
+  "funnelPrev": {
     "exposure": 231691.0,
     "views": 24673.0,
     "prod_exposure": 22178.0,
@@ -9550,31 +9614,6 @@
     "rate_watch_interaction": 3.7,
     "rate_exposure_interaction": 0.31,
     "date": "20261026"
-  },
-  "funnelPrev": {
-    "exposure": 219968.0,
-    "views": 23576.0,
-    "prod_exposure": 21313.0,
-    "prod_click": 5974.0,
-    "buyers": 1069.0,
-    "exposure_count": 490929.0,
-    "watch_count": 40326.0,
-    "comments": 1649.0,
-    "new_live_group": 4.0,
-    "new_fans": 320.0,
-    "new_shopping_group": 6.0,
-    "avg_stay_min": 1.43,
-    "rate_view": 10.72,
-    "rate_prod_exposure": 90.4,
-    "rate_click": 28.03,
-    "rate_buy": 17.89,
-    "rate_total": 0.49,
-    "rate_watch_buy": 2.65,
-    "interactions": 1979.0,
-    "rate_watch_view_times": 8.21,
-    "rate_watch_interaction": 4.91,
-    "rate_exposure_interaction": 0.4,
-    "date": "20261025"
   },
   "liveHistory": [
     {
@@ -12008,9 +12047,28 @@
       "refund_amount": 10380.68,
       "new_shopping_group": 3.0,
       "cost": 40914.21
+    },
+    {
+      "date": "2026-10-27",
+      "exposure": 194077.0,
+      "exposure_count": 432437.0,
+      "views": 21852.0,
+      "watch_count": 38585.0,
+      "avg_stay_min": 1.43,
+      "comments": 1291.0,
+      "new_live_group": 3.0,
+      "new_fans": 258.0,
+      "prod_exposure": 17836.0,
+      "prod_click": 5215.0,
+      "gmv": 92157.01,
+      "hourly_gmv": 4467.2536006168075,
+      "buyers": 916.0,
+      "refund_amount": 9504.66,
+      "new_shopping_group": 4.0,
+      "cost": 34543.58
     }
   ],
-  "fetchedAt": "2026-10-27 06:27:58",
+  "fetchedAt": "2026-10-28 09:22:54",
   "food": {
     "knownDays": [
       {
@@ -16497,35 +16555,75 @@
         "card": 2454.0,
         "other": 880.6,
         "graphic": 0.0
+      },
+      {
+        "date": "2026-10-27",
+        "day": 27,
+        "dv": 17759.13,
+        "sp": 7411.62,
+        "duration": 8.98,
+        "gsv": null,
+        "hourly": 1977.63,
+        "roi": 2.4,
+        "live": 9034.43,
+        "short_video": 4459.7,
+        "card": 3498.3,
+        "other": 766.7,
+        "graphic": 0.0
       }
     ],
     "latest": {
-      "date": "2026-10-26",
-      "day": 26,
-      "b": 18960.44,
-      "c": 8144.25,
-      "d": 13783.14,
-      "e": 1842.7,
-      "f": 2454.0,
-      "g": 880.6,
+      "date": "2026-10-27",
+      "day": 27,
+      "b": 17759.13,
+      "c": 7411.62,
+      "d": 9034.43,
+      "e": 4459.7,
+      "f": 3498.3,
+      "g": 766.7,
       "h": 0.0,
-      "duration": 8.97,
-      "hourly": 2113.76,
+      "duration": 8.98,
+      "hourly": 1977.63,
       "gsv": null,
-      "roi": 2.33
+      "roi": 2.4
     },
     "targetGmv": 850000,
     "targetGsv": 720000.0,
-    "gapGmv": 327080.77,
+    "gapGmv": 309321.64,
     "gapGsv": 720000.0,
     "monthly": {
-      "gmv": 522919.23,
-      "spend": 229800.17,
+      "gmv": 540678.36,
+      "spend": 237211.79,
       "gsv": 0.0,
-      "duration": 265.75,
+      "duration": 274.73,
       "roi": 2.28
     },
     "funnel": {
+      "exposure": 24833.0,
+      "exposure_count": 49796.0,
+      "views": 2418.0,
+      "watch_count": 4099.0,
+      "prod_exposure": 2205.0,
+      "prod_click": 887.0,
+      "buyers": 108.0,
+      "comments": 96.0,
+      "new_live_group": 0.0,
+      "new_fans": 22.0,
+      "new_shopping_group": 0.0,
+      "avg_stay_min": 1.28,
+      "rate_view": 9.74,
+      "rate_prod_exposure": 91.19,
+      "rate_click": 40.23,
+      "rate_buy": 12.18,
+      "rate_total": 0.43,
+      "rate_watch_buy": 2.63,
+      "interactions": 118.0,
+      "rate_watch_view_times": 8.23,
+      "rate_watch_interaction": 2.88,
+      "rate_exposure_interaction": 0.24,
+      "date": "20261027"
+    },
+    "funnelPrev": {
       "exposure": 38357.0,
       "exposure_count": 65752.0,
       "views": 3721.0,
@@ -16549,31 +16647,6 @@
       "rate_watch_interaction": 3.94,
       "rate_exposure_interaction": 0.34,
       "date": "20261026"
-    },
-    "funnelPrev": {
-      "exposure": 47253.0,
-      "exposure_count": 91577.0,
-      "views": 4920.0,
-      "watch_count": 7902.0,
-      "prod_exposure": 4464.0,
-      "prod_click": 1600.0,
-      "buyers": 214.0,
-      "comments": 299.0,
-      "new_live_group": 0.0,
-      "new_fans": 45.0,
-      "new_shopping_group": 1.0,
-      "avg_stay_min": 2.7800000000000002,
-      "rate_view": 10.41,
-      "rate_prod_exposure": 90.73,
-      "rate_click": 35.84,
-      "rate_buy": 13.38,
-      "rate_total": 0.45,
-      "rate_watch_buy": 2.71,
-      "interactions": 345.0,
-      "rate_watch_view_times": 8.63,
-      "rate_watch_interaction": 4.37,
-      "rate_exposure_interaction": 0.38,
-      "date": "20261025"
     },
     "liveHistory": [
       {
@@ -22095,21 +22168,41 @@
         "refund_amount": 512.05,
         "new_shopping_group": 0,
         "cost": 3439.24
+      },
+      {
+        "date": "2026-10-27",
+        "duration": 8.983333333333333,
+        "exposure": 24833.0,
+        "exposure_count": 49796.0,
+        "views": 2418.0,
+        "watch_count": 4099.0,
+        "avg_stay_min": 1.28,
+        "comments": 96.0,
+        "new_live_group": 0,
+        "new_fans": 22.0,
+        "prod_exposure": 2205.0,
+        "prod_click": 887.0,
+        "gmv": 8964.53,
+        "hourly_gmv": 771.3939543644055,
+        "buyers": 108.0,
+        "refund_amount": 782.43,
+        "new_shopping_group": 0,
+        "cost": 4602.25
       }
     ],
     "anchors": [
       {
-        "name": "陈梦婷",
-        "gmv": 6690.0,
-        "spend": 3437.0,
-        "roi": 1.95,
+        "name": "田雨琪",
+        "gmv": 4025.0,
+        "spend": 2182.0,
+        "roi": 1.84,
         "hours": 4.5
       },
       {
-        "name": "田雨琪",
-        "gmv": 6928.0,
-        "spend": 3348.0,
-        "roi": 2.07,
+        "name": "陈梦婷",
+        "gmv": 4939.0,
+        "spend": 2420.0,
+        "roi": 2.04,
         "hours": 4.5
       }
     ],
@@ -25903,6 +25996,26 @@
             "gmv": 6928.0,
             "spend": 3348.0,
             "roi": 2.07,
+            "hours": 4.5
+          }
+        ]
+      },
+      {
+        "serial": 46322,
+        "date": "2026-10-27",
+        "anchors": [
+          {
+            "name": "田雨琪",
+            "gmv": 4025.0,
+            "spend": 2182.0,
+            "roi": 1.84,
+            "hours": 4.5
+          },
+          {
+            "name": "陈梦婷",
+            "gmv": 4939.0,
+            "spend": 2420.0,
+            "roi": 2.04,
             "hours": 4.5
           }
         ]
