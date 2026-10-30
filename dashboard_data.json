@@ -1480,31 +1480,31 @@
   },
   "anchors": [
     {
-      "name": "张铭",
-      "gmv": 23635.0,
-      "spend": 9105.0,
-      "roi": 2.6,
+      "name": "范娇丽",
+      "gmv": 17013.0,
+      "spend": 6726.0,
+      "roi": 2.53,
       "hours": 4.5
     },
     {
       "name": "沈红映",
-      "gmv": 24805.0,
-      "spend": 9066.0,
-      "roi": 2.74,
-      "hours": 4.5
-    },
-    {
-      "name": "范娇丽",
-      "gmv": 29095.0,
-      "spend": 10411.0,
-      "roi": 2.79,
+      "gmv": 17818.0,
+      "spend": 6832.0,
+      "roi": 2.61,
       "hours": 4.5
     },
     {
       "name": "田雨琪",
-      "gmv": 25301.0,
-      "spend": 9455.0,
-      "roi": 2.68,
+      "gmv": 19773.0,
+      "spend": 8446.0,
+      "roi": 2.34,
+      "hours": 4.5
+    },
+    {
+      "name": "杨琼",
+      "gmv": 19946.0,
+      "spend": 6624.0,
+      "roi": 3.01,
       "hours": 4.5
     }
   ],
@@ -9617,23 +9617,23 @@
         },
         {
           "name": "沈红映",
-          "gmv": 31427.0,
-          "spend": 11445.0,
-          "roi": 2.75,
-          "hours": 4.5
-        },
-        {
-          "name": "范娇丽",
-          "gmv": 29095.0,
-          "spend": 10411.0,
-          "roi": 2.79,
+          "gmv": 17818.0,
+          "spend": 6832.0,
+          "roi": 2.61,
           "hours": 4.5
         },
         {
           "name": "田雨琪",
-          "gmv": 25301.0,
-          "spend": 9455.0,
-          "roi": 2.68,
+          "gmv": 19773.0,
+          "spend": 8446.0,
+          "roi": 2.34,
+          "hours": 4.5
+        },
+        {
+          "name": "杨琼",
+          "gmv": 19946.0,
+          "spend": 6624.0,
+          "roi": 3.01,
           "hours": 4.5
         }
       ]
@@ -9657,6 +9657,31 @@
   "targetGmv": 3500000,
   "targetRoi": 3,
   "funnel": {
+    "exposure": 192315.0,
+    "views": 18555.0,
+    "prod_exposure": 16456.0,
+    "prod_click": 4636.0,
+    "buyers": 721.0,
+    "exposure_count": 401998.0,
+    "watch_count": 31620.0,
+    "comments": 1606.0,
+    "new_live_group": 3.0,
+    "new_fans": 216.0,
+    "new_shopping_group": 2.0,
+    "avg_stay_min": 1.47,
+    "rate_view": 9.65,
+    "rate_prod_exposure": 88.69,
+    "rate_click": 28.17,
+    "rate_buy": 15.55,
+    "rate_total": 0.37,
+    "rate_watch_buy": 2.28,
+    "interactions": 1827.0,
+    "rate_watch_view_times": 7.87,
+    "rate_watch_interaction": 5.78,
+    "rate_exposure_interaction": 0.45,
+    "date": "20261029"
+  },
+  "funnelPrev": {
     "exposure": 215308.0,
     "views": 22353.0,
     "prod_exposure": 20298.0,
@@ -9680,31 +9705,6 @@
     "rate_watch_interaction": 4.85,
     "rate_exposure_interaction": 0.42,
     "date": "20261028"
-  },
-  "funnelPrev": {
-    "exposure": 194077.0,
-    "views": 21852.0,
-    "prod_exposure": 17836.0,
-    "prod_click": 5215.0,
-    "buyers": 916.0,
-    "exposure_count": 432437.0,
-    "watch_count": 38585.0,
-    "comments": 1291.0,
-    "new_live_group": 3.0,
-    "new_fans": 258.0,
-    "new_shopping_group": 4.0,
-    "avg_stay_min": 1.43,
-    "rate_view": 11.26,
-    "rate_prod_exposure": 81.62,
-    "rate_click": 29.24,
-    "rate_buy": 17.56,
-    "rate_total": 0.47,
-    "rate_watch_buy": 2.37,
-    "interactions": 1556.0,
-    "rate_watch_view_times": 8.92,
-    "rate_watch_interaction": 4.03,
-    "rate_exposure_interaction": 0.36,
-    "date": "20261027"
   },
   "liveHistory": [
     {
@@ -12178,7 +12178,7 @@
       "cost": 38037.18
     }
   ],
-  "fetchedAt": "2026-10-29 07:17:46",
+  "fetchedAt": "2026-10-30 09:15:39",
   "food": {
     "knownDays": [
       {
@@ -22338,16 +22338,16 @@
     "anchors": [
       {
         "name": "陈梦婷",
-        "gmv": 6717.0,
-        "spend": 3314.0,
-        "roi": 2.03,
+        "gmv": 5682.0,
+        "spend": 3694.0,
+        "roi": 1.54,
         "hours": 4.5
       },
       {
         "name": "刘勤",
-        "gmv": 11760.0,
-        "spend": 5762.0,
-        "roi": 2.04,
+        "gmv": 5066.0,
+        "spend": 2086.0,
+        "roi": 2.43,
         "hours": 4.5
       }
     ],
@@ -26171,16 +26171,16 @@
         "anchors": [
           {
             "name": "陈梦婷",
-            "gmv": 6717.0,
-            "spend": 3314.0,
-            "roi": 2.03,
+            "gmv": 5682.0,
+            "spend": 3694.0,
+            "roi": 1.54,
             "hours": 4.5
           },
           {
             "name": "刘勤",
-            "gmv": 11760.0,
-            "spend": 5762.0,
-            "roi": 2.04,
+            "gmv": 5066.0,
+            "spend": 2086.0,
+            "roi": 2.43,
             "hours": 4.5
           }
         ]
