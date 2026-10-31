@@ -20,7 +20,12 @@ REPORT = "Jos6sfYSRh4eWXtZalBcoFetnCe"
 SCHEDULE = "WRHcsP1gYhSBhrtqNlvcnmPwnBh"
 HANDOFF = "shtcnwOdgFZCQAf4ZjiR5egkoTc"
 MONTHLY = "shtcnzv0loZQg1qk25PcCVonplW"
-MONTHLY_SHEET = "YKWQjE"  # 2026-9 月度大表
+# 月度大表按年月切换：2026-9 → YKWQjE，2026-10 → JuOLPy
+MONTHLY_SHEETS = {
+    (2026, 9): "YKWQjE",
+    (2026, 10): "JuOLPy",
+}
+MONTHLY_SHEET = "YKWQjE"  # 兼容旧引用（默认 2026-9）
 LIVE_DATA = "shtcniNUd2HqPd8ZvZOt8btOScf"
 LIVE_SHEET = "bea4e1"
 LIVE_ACCOUNT = "阴山优麦冲饮旗舰店"
@@ -122,42 +127,54 @@ def shell_quote(text):
 def find_data_file(shop, prefix):
     """Find the target Excel in the shop's data folder, falling back to ROOT."""
     base = FOOD_DIR if shop == "food" else DRINK_DIR
-    candidates = sorted(base.glob(f"{prefix}*.xlsx")) if base.exists() else []
+    candidates = list(base.glob(f"{prefix}*.xlsx")) if base.exists() else []
     if not candidates:
-        candidates = sorted(ROOT.glob(f"{prefix}*.xlsx"))
-    return candidates[-1] if candidates else None
+        candidates = list(ROOT.glob(f"{prefix}*.xlsx"))
+    return max(candidates, key=lambda p: p.stat().st_mtime) if candidates else None
 
 
-def load_live(day, shop="drink"):
+def load_live_table(day, shop="drink"):
+    """Return the live workbook header and rows without relying on column positions."""
     ymd = day.strftime("%Y%m%d")
     path = find_data_file(shop, f"直播明细_全部账号_{ymd}_{ymd}")
     if not path:
         print(f"Warning: live Excel for {ymd} not found, returning empty live data")
-        return defaultdict(lambda: {"gmv": 0.0, "cost": 0.0})
+        return [], []
     wb = load_workbook(path, data_only=True, read_only=True)
     ws = wb["直播间明细"]
+    rows = ws.iter_rows(values_only=True)
+    header = next(rows, ())
+    header = [str(value).strip() if value is not None else "" for value in header]
+    return header, rows
+
+
+def live_value(row, header, name, default=0):
+    try:
+        return row[header.index(name)]
+    except (ValueError, IndexError):
+        return default
+
+
+def load_live(day, shop="drink"):
+    """Read live rows by header name so source columns can be reordered safely."""
+    header, rows = load_live_table(day, shop)
     summary = defaultdict(lambda: {"gmv": 0.0, "cost": 0.0})
-    for row in ws.iter_rows(min_row=2, values_only=True):
-        name = row[1]
+    for row in rows:
+        name = live_value(row, header, "主播昵称", None)
         if not name:
             continue
-        summary[str(name)]["gmv"] += num(row[25])
-        summary[str(name)]["cost"] += num(row[43])
+        summary[str(name)]["gmv"] += num(live_value(row, header, "直播间成交金额"))
+        summary[str(name)]["cost"] += num(live_value(row, header, "投放消耗(店铺绑定)"))
     return summary
 
 
 def load_live_detail(day, account_name, shop="drink"):
-    """Load full detail rows for a specific account from the live stream Excel."""
-    ymd = day.strftime("%Y%m%d")
-    path = find_data_file(shop, f"直播明细_全部账号_{ymd}_{ymd}")
-    if not path:
-        return []
-    wb = load_workbook(path, data_only=True, read_only=True)
-    ws = wb["直播间明细"]
+    """Load target-account rows as dictionaries keyed by source column names."""
+    header, rows = load_live_table(day, shop)
     records = []
-    for row in ws.iter_rows(min_row=2, values_only=True):
-        if row[1] == account_name:
-            records.append(row)
+    for row in rows:
+        if live_value(row, header, "主播昵称", None) == account_name:
+            records.append(dict(zip(header, row)))
     return records
 
 
@@ -184,29 +201,49 @@ def parse_date_cell(value):
     numeric = num(text)
     return int(numeric) if numeric else None
 
-def find_date_row(token, sheet, target_serial):
-    """Find the row number in any sheet where column A matches an Excel serial."""
+def find_date_row(token, sheet, target_serial, next_row_on_missing=False):
+    """Find the row number in any sheet where column A matches an Excel serial.
+
+    next_row_on_missing=True 时，若表中还没有该日期，就返回最后一个日期行的下一行，
+    以便跨月时自动追加新日期的行。
+    """
     values = run_lark_read(token, f"{sheet}!A:A")
+    last_date_row = None
     for i, row in enumerate(values):
         if row and parse_date_cell(row[0]) == target_serial:
             return i + 1
-    return None
+        if row and parse_date_cell(row[0]):
+            last_date_row = i + 1
+    return (last_date_row + 1) if (next_row_on_missing and last_date_row) else None
+
+
+def read_organic_spend(uu_row):
+    """Use the manually maintained organic oat spend in UUAtO2 column Q as source of truth."""
+    values = run_lark_read(REPORT, f"UUAtO2!Q{uu_row}")
+    return num(values[0][0]) if values and values[0] else 0.0
+
+
+def read_organic_metrics(uu_row):
+    """Read the manually maintained organic oat GMV/spend from P/Q as a fallback."""
+    values = run_lark_read(REPORT, f"UUAtO2!P{uu_row}:Q{uu_row}")
+    row = values[0] if values and values[0] else []
+    return num(row[0]) or 0.0, num(row[1]) or 0.0
 
 
 def aggregate_live_records(records):
     """Aggregate multiple live records: sum for volume metrics, max for rate/peak metrics."""
     return {
-        "观看次数": sum(num(r[10]) for r in records),
-        "成交金额": sum(num(r[25]) for r in records),
-        "直播时长_min": sum(num(r[5]) for r in records),
-        "投放消耗": sum(num(r[43]) for r in records),
-        "成交件数": sum(num(r[28]) for r in records),
-        "成交人数": sum(num(r[29]) for r in records),
-        "最高在线": max(num(r[11]) for r in records),
-        "平均在线": max(num(r[12]) for r in records),
-        "平均停留_min": max(num(r[13]) for r in records),
-        "观看成交率人数": max(num(r[39]) for r in records),
-        "商品点击成交率人数": max(num(r[37]) for r in records),
+        "观看次数": sum(num(r.get("直播间观看次数")) for r in records),
+        "成交金额": sum(num(r.get("直播间成交金额")) for r in records),
+        "直播时长_min": sum(num(r.get("直播时长(分钟)")) for r in records),
+        "投放消耗": sum(num(r.get("投放消耗(店铺绑定)")) for r in records),
+        "成交件数": sum(num(r.get("直播间成交件数")) for r in records),
+        "成交人数": sum(num(r.get("直播间成交人数")) for r in records),
+        "最高在线": max(num(r.get("最高在线人数")) for r in records),
+        "平均在线": max(num(r.get("平均在线人数")) for r in records),
+        "平均停留_min": max(num(r.get("人均观看时长(分钟)")) for r in records),
+        "观看成交率人数": max(num(r.get("观看-成交率(人数)")) for r in records),
+        "商品点击成交率人数": max(num(r.get("商品点击-成交率(人数)")) for r in records),
     }
 
 
@@ -334,16 +371,21 @@ def import_live_writes(day, shop):
     """Append target-date live detail rows to cC79qR (drink) or weIxvN (food)."""
     account = LIVE_ACCOUNT if shop == "drink" else FOOD_ACCOUNT
     sheet = DRINK_LIVE_DETAIL_SHEET if shop == "drink" else FOOD_LIVE_DETAIL_SHEET
-    records = [list(r) for r in load_live_detail(day, account, shop)]
+    records = load_live_detail(day, account, shop)
     if not records:
         return []
+    header_values = run_lark_read(REPORT, f"{sheet}!A1:BC1")
+    header = [str(value).strip() for value in (header_values[0] if header_values else []) if value not in (None, "")]
+    output_values = [[record.get(name) for name in header] for record in records]
+    last_col = col_name(len(header) - 1)
     existing = run_lark_read(REPORT, f"{sheet}!A1:D1000")
     def row_date(v):
         m = re.match(r"(\d{4})[/-](\d{1,2})[/-](\d{1,2})", str(v or "").strip())
         return (int(m.group(1)), int(m.group(2)), int(m.group(3))) if m else None
-    for row in existing[1:]:
+    for row_index, row in enumerate(existing[1:], start=2):
         if len(row) > 3 and str(row[1] or "").strip() == account and row_date(row[3]) == (day.year, day.month, day.day):
-            return []
+            end = row_index + len(output_values) - 1
+            return [(REPORT, f"{sheet}!A{row_index}:{last_col}{end}", output_values)]
     values = run_lark_read(REPORT, f"{sheet}!A1:A1000")
     start = 2
     for i, row in enumerate(values, start=1):
@@ -352,8 +394,8 @@ def import_live_writes(day, shop):
             break
     else:
         start = len(values) + 1
-    end = start + len(records) - 1
-    return [(REPORT, f"{sheet}!A{start}:BB{end}", records)]
+    end = start + len(output_values) - 1
+    return [(REPORT, f"{sheet}!A{start}:{last_col}{end}", output_values)]
 
 def build_writes(day, offline_example=False, qianchuan_cost=None, shop="drink"):
     serial = excel_serial(day)
@@ -363,6 +405,7 @@ def build_writes(day, offline_example=False, qianchuan_cost=None, shop="drink"):
 
     oat_flake = live.get("阴山有机-宿州") or live.get("阴山优麦有机燕麦片", {"gmv": 0, "cost": 0})
     oat_rice = live.get("阴山优麦有机燕麦米", {"gmv": 0, "cost": 0})
+    yinshan_live = live.get("阴山优麦直播间", {"gmv": 0, "cost": 0})
     postal = live.get("蒙邮优选") or live.get("中国邮政乌兰察布分公司") or live.get("中国邮政集团有限公司乌兰察布市分公司", {"gmv": 0, "cost": 0})
     total_cost = rounded(sum(live.get(name, {"cost": 0})["cost"] for name in ACCOUNTS), 2)
 
@@ -371,7 +414,8 @@ def build_writes(day, offline_example=False, qianchuan_cost=None, shop="drink"):
         for k in ["直播", "短视频", "商品卡", "图文", "其他"]
     }
     report_total_gmv = rounded(sum(carriers.values()), 2)
-    full_gmv = rounded(report_total_gmv - oat_flake["gmv"] - oat_rice["gmv"], 2)
+    # 总GMV/总消耗扣除阴山优麦有机燕麦片和阴山优麦直播间的成交与消耗
+    full_gmv = rounded(report_total_gmv - oat_flake["gmv"] - oat_rice["gmv"] - yinshan_live["gmv"], 2)
 
     monthly_row = day_num + 4
 
@@ -379,7 +423,7 @@ def build_writes(day, offline_example=False, qianchuan_cost=None, shop="drink"):
     add = writes.append
 
     if shop == "food":
-        food_row = find_date_row(REPORT, FOOD_SHOP_SHEET, serial)
+        food_row = find_date_row(REPORT, FOOD_SHOP_SHEET, serial, next_row_on_missing=True)
         food_row = food_row or FOOD_SHOP_FALLBACK_ROW
         add((REPORT, f"{FOOD_SHOP_SHEET}!A{food_row}", [[serial]]))
         if food_row:
@@ -393,20 +437,32 @@ def build_writes(day, offline_example=False, qianchuan_cost=None, shop="drink"):
             add((REPORT, f"{FOOD_SHOP_SHEET}!H{food_row}", [[rounded(carriers["图文"])]]))
             if qianchuan_cost is not None:
                 add((REPORT, f"{FOOD_SHOP_SHEET}!I{food_row}", [[roi(report_total_gmv, qianchuan_cost)]]))
-        add((MONTHLY, f"{MONTHLY_SHEET}!K{monthly_row}", [[report_total_gmv]]))
-        if qianchuan_cost is not None:
-            add((MONTHLY, f"{MONTHLY_SHEET}!M{monthly_row}", [[rounded(qianchuan_cost, 2)]]))
+        monthly_sheet = MONTHLY_SHEETS.get((day.year, day.month))
+        if monthly_sheet:
+            add((MONTHLY, f"{monthly_sheet}!K{monthly_row}", [[report_total_gmv]]))
+            if qianchuan_cost is not None:
+                add((MONTHLY, f"{monthly_sheet}!M{monthly_row}", [[rounded(qianchuan_cost, 2)]]))
+        else:
+            print(f"Warning: no monthly sheet configured for {day.year}-{day.month}, skipping monthly writes")
         writes.extend(import_live_writes(day, shop))
         return writes
 
     # UUAtO2 — 仪表盘数据源
-    uu_row = find_date_row(REPORT, "UUAtO2", serial)
+    uu_row = find_date_row(REPORT, "UUAtO2", serial, next_row_on_missing=True)
     uu_row = uu_row or DRINK_SHOP_FALLBACK_ROW
     add((REPORT, f"UUAtO2!A{uu_row}", [[serial]]))
-    add((REPORT, f"UUAtO2!B{uu_row}", [[report_total_gmv]]))
+    # Single-account live exports may omit the organic oat account; P/Q remain authoritative.
+    if not oat_flake["gmv"] and not oat_rice["gmv"]:
+        organic_gmv, organic_spend = read_organic_metrics(uu_row)
+        if organic_gmv:
+            oat_flake["gmv"] = organic_gmv
+        if organic_spend:
+            oat_flake["cost"] = organic_spend
+        full_gmv = rounded(report_total_gmv - oat_flake["gmv"] - oat_rice["gmv"] - yinshan_live["gmv"], 2)
+    add((REPORT, f"UUAtO2!B{uu_row}", [[full_gmv]]))
     if qianchuan_cost is not None:
-        add((REPORT, f"UUAtO2!C{uu_row}", [[rounded(qianchuan_cost, 2)]]))
-    # 千川消耗（C列）由人工填写，脚本不再写入（2026-08-19 用户确认）
+        net_spend = qianchuan_cost - (read_organic_spend(uu_row) or oat_flake["cost"]) - yinshan_live["cost"]
+        add((REPORT, f"UUAtO2!C{uu_row}", [[rounded(net_spend, 2)]]))
     add((REPORT, f"UUAtO2!D{uu_row}", [[rounded(carriers["直播"])]]))
     add((REPORT, f"UUAtO2!E{uu_row}", [[rounded(carriers["短视频"])]]))
     add((REPORT, f"UUAtO2!F{uu_row}", [[rounded(carriers["商品卡"])]]))
@@ -415,11 +471,18 @@ def build_writes(day, offline_example=False, qianchuan_cost=None, shop="drink"):
     # 低GI视频号GMV/消耗由用户手动维护，脚本只更新ROI。
     add((REPORT, f"UUAtO2!L{uu_row}", [[roi(postal["gmv"], postal["cost"])]]))
 
-    add((MONTHLY, f"{MONTHLY_SHEET}!D{monthly_row}", [[full_gmv]]))
-    if qianchuan_cost is not None:
-        full_cost = qianchuan_cost - oat_flake["cost"]
-        add((MONTHLY, f"{MONTHLY_SHEET}!F{monthly_row}", [[rounded(full_cost, 2)]]))
-    for col, data in [("Q", postal)]:
+    monthly_sheet = MONTHLY_SHEETS.get((day.year, day.month))
+    if monthly_sheet:
+        add((MONTHLY, f"{monthly_sheet}!D{monthly_row}", [[full_gmv]]))
+        if qianchuan_cost is not None:
+            full_cost = qianchuan_cost - (read_organic_spend(uu_row) or oat_flake["cost"]) - yinshan_live["cost"]
+            add((MONTHLY, f"{monthly_sheet}!F{monthly_row}", [[rounded(full_cost, 2)]]))
+    else:
+        print(f"Warning: no monthly sheet configured for {day.year}-{day.month}, skipping monthly writes")
+    # Q/R/S 列在不同月份归属其他项目（如“拓趣一店”），只在确实取到邮政账号数据时才写入。
+    for col, data in ([("Q", postal)] if (postal["gmv"] or postal["cost"]) else []):
+        if not monthly_sheet:
+            break
         gmv = rounded(data["gmv"])
         cost = rounded(data["cost"])
         # Convert by index instead of relying on ASCII after Z.
@@ -427,9 +490,9 @@ def build_writes(day, offline_example=False, qianchuan_cost=None, shop="drink"):
         for ch in col:
             start_index = start_index * 26 + ord(ch) - 64
         start_index -= 1
-        add((MONTHLY, f"{MONTHLY_SHEET}!{col}{monthly_row}", [[gmv]]))
-        add((MONTHLY, f"{MONTHLY_SHEET}!{col_name(start_index + 1)}{monthly_row}", [[cost]]))
-        add((MONTHLY, f"{MONTHLY_SHEET}!{col_name(start_index + 2)}{monthly_row}", [[roi(gmv, cost)]]))
+        add((MONTHLY, f"{monthly_sheet}!{col}{monthly_row}", [[gmv]]))
+        add((MONTHLY, f"{monthly_sheet}!{col_name(start_index + 1)}{monthly_row}", [[cost]]))
+        add((MONTHLY, f"{monthly_sheet}!{col_name(start_index + 2)}{monthly_row}", [[roi(gmv, cost)]]))
 
     # 阴山优麦冲饮旗舰店直播间数据记录表
     records = load_live_detail(day, LIVE_ACCOUNT, shop)
