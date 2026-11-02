@@ -67,6 +67,8 @@ description: Fill the Yinshan Youmai Feishu daily data report from local Douyin 
 | `Jos6sfYSRh4eWXtZalBcoFetnCe` | `cC79qR` | 冲饮店直播间明细 |
 | `Jos6sfYSRh4eWXtZalBcoFetnCe` | `weIxvN` | 食品店直播数据表 |
 | `shtcnzv0loZQg1qk25PcCVonplW` | `YKWQjE` | 2026-9 月度大表 |
+| `shtcnzv0loZQg1qk25PcCVonplW` | `JuOLPy` | 2026-10 月度大表 |
+| `shtcnzv0loZQg1qk25PcCVonplW` | `pWpY5o` | 2026-11 月度大表 |
 | `shtcniNUd2HqPd8ZvZOt8btOScf` | `bea4e1` | 冲饮店直播间汇总表 |
 | `CD2psfSlghdutdt9wHmcOJaDntf` | `cdzpqi` | 食品店交班数据（主播班次） |
 
@@ -104,6 +106,7 @@ description: Fill the Yinshan Youmai Feishu daily data report from local Douyin 
 - 直播明细：`直播间明细` 表，账号名在 B 列，GMV 在第 26 列，投放消耗在第 44 列。
 - 罗盘：`自营成交` 表，取目标日期、`不限` 投放时段、`成交金额` 列（脚本按表头自动识别列位置，冲饮/食品罗盘列序不同也能兼容）。
 - 冲饮全店 GMV = 各载体成交金额之和；YKWQjE `D` 再扣除燕麦片/燕麦米账号 GMV。
+- 冲饮店汇总区“直播GMV”（`UUAtO2` D 列）必须从罗盘 `账号构成` 表重新计算：筛选 `自营/合作=自营`，汇总所有自营直播间的 `成交金额`，不能直接取 `自营成交` 的“直播”载体金额。2026-10-30 示例：阴山优麦冲饮旗舰店 + 阴山优麦直播间 + 阴山优麦有机燕麦片 = `115100.31`。
 - ROI = GMV / 千川消耗，保留 2 位小数；消耗为 0 时写 0。
 
 ## 验证
