@@ -26,6 +26,11 @@ MONTHLY_SHEETS = {
     (2026, 10): "JuOLPy",
     (2026, 11): "pWpY5o",
 }
+MONTHLY_FOOD_COLUMNS = {
+    (2026, 9): ("K", "M", None),
+    (2026, 10): ("K", "M", None),
+    (2026, 11): ("J", "K", "M"),
+}
 MONTHLY_SHEET = "YKWQjE"  # 兼容旧引用（默认 2026-9）
 LIVE_DATA = "shtcniNUd2HqPd8ZvZOt8btOScf"
 LIVE_SHEET = "bea4e1"
@@ -472,9 +477,17 @@ def build_writes(day, offline_example=False, qianchuan_cost=None, shop="drink"):
                 add((REPORT, f"{FOOD_SHOP_SHEET}!I{food_row}", [[roi(report_total_gmv, qianchuan_cost)]]))
         monthly_sheet = MONTHLY_SHEETS.get((day.year, day.month))
         if monthly_sheet:
-            add((MONTHLY, f"{monthly_sheet}!K{monthly_row}", [[report_total_gmv]]))
+            gmv_col, spend_col, duration_col = MONTHLY_FOOD_COLUMNS.get(
+                (day.year, day.month), ("K", "M", None)
+            )
+            add((MONTHLY, f"{monthly_sheet}!{gmv_col}{monthly_row}", [[report_total_gmv]]))
             if qianchuan_cost is not None:
-                add((MONTHLY, f"{monthly_sheet}!M{monthly_row}", [[rounded(qianchuan_cost, 2)]]))
+                add((MONTHLY, f"{monthly_sheet}!{spend_col}{monthly_row}", [[rounded(qianchuan_cost, 2)]]))
+            if duration_col:
+                records = load_live_detail(day, FOOD_ACCOUNT, shop)
+                if records:
+                    duration_h = round(aggregate_live_records(records)["直播时长_min"] / 60)
+                    add((MONTHLY, f"{monthly_sheet}!{duration_col}{monthly_row}", [[duration_h]]))
         else:
             print(f"Warning: no monthly sheet configured for {day.year}-{day.month}, skipping monthly writes")
         writes.extend(import_live_writes(day, shop))

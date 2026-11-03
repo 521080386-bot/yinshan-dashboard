@@ -94,6 +94,8 @@ description: Fill the Yinshan Youmai Feishu daily data report from local Douyin 
   - `B` 抖音GMV、`C` 千川消耗、`D-H` 直播/短视频/商品卡/其他/图文、`I` 当日ROI
 - `YKWQjE`：行 = `day + 4`
   - `K` 抖音GMV、`M` 千川/全店消耗；`J` 总GMV含智能券由 `K+L` 公式自动计算
+- `pWpY5o`（2026-11）：行 = `day + 4`
+  - `J` 抖音GMV、`K` 全店消耗、`M` 直播时长小时；`L` ROI、`N` 小时均由公式计算
 - `weIxvN`：自动追加当日原始直播明细行
 
 ## 主播数据与算式
