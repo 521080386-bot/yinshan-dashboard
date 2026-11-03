@@ -78,6 +78,7 @@ description: Fill the Yinshan Youmai Feishu daily data report from local Douyin 
 
 - `UUAtO2`：按 Excel 日期序列定位行；9 月 1 日从第 33 行开始。
   - `B` 抖音GMV、`C` 千川消耗（传入 `--qianchuan-cost` 才写）、`D-H` 直播/短视频/商品卡/其他/图文
+  - `P/Q` 阴山优麦有机燕麦片 GMV/消耗、`R` ROI；`S/T` 阴山优麦直播间 GMV/消耗、`U` ROI
   - `L` 低GI视频号 ROI；`J/K`（低GI视频号GMV/消耗）由用户手动维护，脚本不写
   - `I` 当日ROI 由公式计算，不写
 - `YKWQjE`：行 = `day + 4`
@@ -95,6 +96,7 @@ description: Fill the Yinshan Youmai Feishu daily data report from local Douyin 
 - `YKWQjE`：行 = `day + 4`
   - `K` 抖音GMV、`M` 千川/全店消耗；`J` 总GMV含智能券由 `K+L` 公式自动计算
 - `pWpY5o`（2026-11）：行 = `day + 4`
+  - `BS/BU` 阴山优麦有机麦片 GMV/消耗；`BX/BZ` 阴山优麦直播间（低gi五黑）GMV/消耗
   - `J` 抖音GMV、`K` 全店消耗、`M` 直播时长小时；`L` ROI、`N` 小时均由公式计算
 - `weIxvN`：自动追加当日原始直播明细行
 

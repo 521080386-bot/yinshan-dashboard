@@ -1294,6 +1294,13 @@
       "gmv": 5753.2,
       "spend": 2497.61,
       "roi": 2.3
+    },
+    {
+      "date": "2026-11-02",
+      "day": 2,
+      "gmv": 2636.8,
+      "spend": 1284.45,
+      "roi": 2.05
     }
   ],
   "postalHistory": [
@@ -1560,9 +1567,9 @@
     "roi": 0
   },
   "organic": {
-    "gmv": 0,
-    "spend": 0,
-    "roi": 0
+    "gmv": 2636.8,
+    "spend": 1284.45,
+    "roi": 2.05
   },
   "anchors": [
     {
@@ -9872,9 +9879,9 @@
     "roi": 3.27
   },
   "organicMonthly": {
-    "gmv": 0.0,
-    "spend": 0.0,
-    "roi": 0
+    "gmv": 2636.8,
+    "spend": 1284.45,
+    "roi": 2.05
   },
   "targetGmv": 3500000,
   "targetRoi": 3,
@@ -12495,7 +12502,7 @@
       "cost": 36122.36
     }
   ],
-  "fetchedAt": "2026-11-03 09:39:56",
+  "fetchedAt": "2026-11-03 09:54:57",
   "food": {
     "knownDays": [
       {

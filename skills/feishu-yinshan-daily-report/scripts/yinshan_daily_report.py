@@ -31,6 +31,12 @@ MONTHLY_FOOD_COLUMNS = {
     (2026, 10): ("K", "M", None),
     (2026, 11): ("J", "K", "M"),
 }
+MONTHLY_LIVE_ROOM_COLUMNS = {
+    (2026, 11): {
+        "organic": ("BS", "BU"),
+        "yinshan": ("BX", "BZ"),
+    },
+}
 MONTHLY_SHEET = "YKWQjE"  # 兼容旧引用（默认 2026-9）
 LIVE_DATA = "shtcniNUd2HqPd8ZvZOt8btOScf"
 LIVE_SHEET = "bea4e1"
@@ -444,6 +450,8 @@ def build_writes(day, offline_example=False, qianchuan_cost=None, shop="drink"):
     oat_flake = live.get("阴山有机-宿州") or live.get("阴山优麦有机燕麦片", {"gmv": 0, "cost": 0})
     oat_rice = live.get("阴山优麦有机燕麦米", {"gmv": 0, "cost": 0})
     yinshan_live = live.get("阴山优麦直播间", {"gmv": 0, "cost": 0})
+    organic_live = live.get("阴山优麦有机燕麦片")
+    yinshan_account = live.get("阴山优麦直播间")
     postal = live.get("蒙邮优选") or live.get("中国邮政乌兰察布分公司") or live.get("中国邮政集团有限公司乌兰察布市分公司", {"gmv": 0, "cost": 0})
     total_cost = rounded(sum(live.get(name, {"cost": 0})["cost"] for name in ACCOUNTS), 2)
 
@@ -517,6 +525,14 @@ def build_writes(day, offline_example=False, qianchuan_cost=None, shop="drink"):
     add((REPORT, f"UUAtO2!F{uu_row}", [[rounded(carriers["商品卡"])]]))
     add((REPORT, f"UUAtO2!G{uu_row}", [[rounded(carriers["其他"])]]))
     add((REPORT, f"UUAtO2!H{uu_row}", [[rounded(carriers["图文"])]]))
+    if organic_live is not None:
+        add((REPORT, f"UUAtO2!P{uu_row}", [[rounded(organic_live["gmv"])]]))
+        add((REPORT, f"UUAtO2!Q{uu_row}", [[rounded(organic_live["cost"])]]))
+        add((REPORT, f"UUAtO2!R{uu_row}", [[f"=P{uu_row}/Q{uu_row}"]]))
+    if yinshan_account is not None:
+        add((REPORT, f"UUAtO2!S{uu_row}", [[rounded(yinshan_account["gmv"])]]))
+        add((REPORT, f"UUAtO2!T{uu_row}", [[rounded(yinshan_account["cost"])]]))
+        add((REPORT, f"UUAtO2!U{uu_row}", [[f"=S{uu_row}/T{uu_row}"]]))
     # 低GI视频号GMV/消耗由用户手动维护，脚本只更新ROI。
     add((REPORT, f"UUAtO2!L{uu_row}", [[roi(postal["gmv"], postal["cost"])]]))
 
@@ -526,6 +542,15 @@ def build_writes(day, offline_example=False, qianchuan_cost=None, shop="drink"):
         if qianchuan_cost is not None:
             full_cost = qianchuan_cost - (read_organic_spend(uu_row) or oat_flake["cost"]) - yinshan_live["cost"]
             add((MONTHLY, f"{monthly_sheet}!F{monthly_row}", [[rounded(full_cost, 2)]]))
+        room_cols = MONTHLY_LIVE_ROOM_COLUMNS.get((day.year, day.month), {})
+        if organic_live is not None and room_cols.get("organic"):
+            gmv_col, cost_col = room_cols["organic"]
+            add((MONTHLY, f"{monthly_sheet}!{gmv_col}{monthly_row}", [[rounded(organic_live["gmv"])]]))
+            add((MONTHLY, f"{monthly_sheet}!{cost_col}{monthly_row}", [[rounded(organic_live["cost"])]]))
+        if yinshan_account is not None and room_cols.get("yinshan"):
+            gmv_col, cost_col = room_cols["yinshan"]
+            add((MONTHLY, f"{monthly_sheet}!{gmv_col}{monthly_row}", [[rounded(yinshan_account["gmv"])]]))
+            add((MONTHLY, f"{monthly_sheet}!{cost_col}{monthly_row}", [[rounded(yinshan_account["cost"])]]))
     else:
         print(f"Warning: no monthly sheet configured for {day.year}-{day.month}, skipping monthly writes")
     # Q/R/S 列在不同月份归属其他项目（如“拓趣一店”），只在确实取到邮政账号数据时才写入。
