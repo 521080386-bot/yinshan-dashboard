@@ -521,7 +521,7 @@ createApp({setup(){
   const isFood=computed(()=>view.value.startsWith('food'))
   const activeKnownDays=computed(()=>isFood.value ? (foodData.value?.knownDays||[]) : knownDays.value)
   const activeLatest=computed(()=>isFood.value ? (foodData.value?.latest||null) : latestData.value)
-  const activeTargetGmv=computed(()=>isFood.value ? (foodData.value?.targetGmv||840000) : targetGmv.value)
+  const activeTargetGmv=computed(()=>isFood.value ? (foodData.value?.targetGmv||650000) : targetGmv.value)
   const activeFunnel=computed(()=>isFood.value ? (foodData.value?.funnel||null) : funnel.value)
   const activeFunnelPrev=computed(()=>isFood.value ? (foodData.value?.funnelPrev||null) : funnelPrev.value)
   const activeAnchorHistory=computed(()=>isFood.value ? (foodData.value?.anchorHistory||[]) : anchorHistory.value)
@@ -989,7 +989,7 @@ createApp({setup(){
   function switchView(v){view.value=v;nextTick(()=>{if(v==='chongyin_daily'||v==='food_daily'){initHistRange();initCharts();resizeCharts()}else if(v==='chongyin_history'||v==='food_history'){initHistRange();renderTrend();renderAnchorHist();renderHistLayer();renderHistWatchRate()}})}
   function selectCard(key){selectedCard.value=key;nextTick(renderTrend)}
   const foodMonthly=computed(()=>foodData.value?.monthly||{gmv:0,spend:0,gsv:0,duration:0,roi:0})
-  const foodTargets=computed(()=>({targetGmv:foodData.value?.targetGmv||880000,targetGsv:foodData.value?.targetGsv||720000,gapGmv:foodData.value?.gapGmv,gapGsv:foodData.value?.gapGsv}))
+  const foodTargets=computed(()=>({targetGmv:foodData.value?.targetGmv||650000,targetGsv:foodData.value?.targetGsv||720000,gapGmv:foodData.value?.gapGmv,gapGsv:foodData.value?.gapGsv}))
   const foodGapGmv=computed(()=>foodTargets.value.targetGmv-cumulativeTx.value)
   const foodGapGsv=computed(()=>foodTargets.value.targetGsv-foodMonthly.value.gsv)
   const foodRemainGmv=computed(()=>Math.max(0,foodGapGmv.value)/Math.max(1,remainingDays.value))

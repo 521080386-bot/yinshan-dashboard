@@ -30,9 +30,9 @@ FOOD_LIVE_SHEET = "weIxvN"
 REPORT_MONTH_START = date(2026, 9, 1)
 DRINK_SELF_LIVE_RULE_START = "2026-10-30"
 
-# 当月目标（业务确认后手动更新）：2026-10 冲饮店 GMV 350 万、食品店 GMV 85 万
+# 当月目标（业务确认后手动更新）：2026-11 冲饮店 GMV 350 万、食品店 GMV 65 万
 DRINK_TARGET_GMV = 3_500_000
-FOOD_TARGET_GMV = 850_000
+FOOD_TARGET_GMV = 650_000
 
 def lark_read(token, range_expr, value_render=None, identity="bot", timeout=15):
     cmd = [LARK_CLI, "sheets", "+read", "--as", identity,

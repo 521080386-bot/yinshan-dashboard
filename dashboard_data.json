@@ -12495,7 +12495,7 @@
       "cost": 36122.36
     }
   ],
-  "fetchedAt": "2026-11-03 09:24:52",
+  "fetchedAt": "2026-11-03 09:39:56",
   "food": {
     "knownDays": [
       {
@@ -17104,9 +17104,9 @@
       "gsv": null,
       "roi": 2.23
     },
-    "targetGmv": 850000,
+    "targetGmv": 650000,
     "targetGsv": 720000.0,
-    "gapGmv": 795342.68,
+    "gapGmv": 595342.68,
     "gapGsv": 720000.0,
     "monthly": {
       "gmv": 54657.32,
