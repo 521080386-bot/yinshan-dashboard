@@ -369,62 +369,6 @@ def fetch_prev_funnel_from_excel():
         return None
 
 
-def latest_drink_compass_file():
-    """Return the newest business-date Luopan workbook, preferring the latest copy per date."""
-    base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), DRINK_DATA_DIR)
-    files = glob.glob(os.path.join(base_dir, "抖音电商罗盘-成交分析-*.xlsx"))
-    by_date = {}
-    for path in files:
-        match = re.search(r"成交分析-(\d{8})-\d{8}", os.path.basename(path))
-        if not match:
-            continue
-        business_date = match.group(1)
-        if business_date not in by_date or os.path.getmtime(path) > os.path.getmtime(by_date[business_date]):
-            by_date[business_date] = path
-    return by_date[max(by_date)] if by_date else None
-
-
-def fetch_latest_self_live_from_compass():
-    """Sum all self-operated live-room account GMV in the newest Luopan account breakdown."""
-    path = latest_drink_compass_file()
-    if not path:
-        return None
-    try:
-        from openpyxl import load_workbook
-        wb = load_workbook(path, data_only=True, read_only=True)
-        try:
-            ws = wb["账号构成"]
-            ws.reset_dimensions()
-            rows = list(ws.iter_rows(values_only=True))
-        finally:
-            wb.close()
-        if not rows:
-            return None
-        header = rows[0]
-        total = 0.0
-        accounts = []
-        for row in rows[1:]:
-            if str(named_value(row, header, "自营/合作", "") or "").strip() != "自营":
-                continue
-            account = str(named_value(row, header, "账号名称", "") or "").strip()
-            amount = pn(named_value(row, header, "成交金额")) or 0
-            total += amount
-            if account:
-                accounts.append({"name": account, "gmv": rounded(amount)})
-        if not accounts:
-            return None
-        match = re.search(r"成交分析-(\d{8})-\d{8}", os.path.basename(path))
-        ymd = match.group(1) if match else ""
-        return {
-            "date": f"{ymd[:4]}-{ymd[4:6]}-{ymd[6:8]}" if ymd else None,
-            "gmv": rounded(total),
-            "accounts": accounts,
-        }
-    except Exception as e:
-        print(f"[warn] self live compass: {e}", file=sys.stderr)
-        return None
-
-
 def parse_live_date(value):
     """cC79qR 的开始时间可能是 Excel 序列号或 YYYY/M/D H:MM 字符串。"""
     if value is None or value == "":
@@ -789,7 +733,6 @@ def fetch_data():
         return None
 
     out = {}
-    self_live_latest = fetch_latest_self_live_from_compass()
 
     # 有机燕麦片是独立渠道；全店口径需扣除 P/Q 两列
     known = []
@@ -807,8 +750,6 @@ def fetch_data():
             raw_live = pn(row[3]) if len(row) > 3 else None
             if business_date and business_date >= DRINK_SELF_LIVE_RULE_START:
                 live_gmv = raw_live
-                if self_live_latest and business_date == self_live_latest["date"]:
-                    live_gmv = self_live_latest["gmv"]
             else:
                 live_gmv = raw_live - organic_gmv if raw_live is not None else None
             known.append({

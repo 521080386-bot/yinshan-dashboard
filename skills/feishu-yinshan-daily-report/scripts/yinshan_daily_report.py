@@ -299,38 +299,6 @@ def load_compass(day, shop="drink"):
     return summary
 
 
-def load_self_live_gmv(day, shop="drink"):
-    """Sum 成交金额 for every self-operated live-room account in 账号构成."""
-    ymd = day.strftime("%Y%m%d")
-    path = find_data_file(shop, f"抖音电商罗盘-成交分析-{ymd}-{ymd}")
-    if not path:
-        return 0.0, []
-
-    wb = load_workbook(path, data_only=True, read_only=True)
-    try:
-        ws = wb["账号构成"]
-        ws.reset_dimensions()
-        rows = list(ws.iter_rows(values_only=True))
-        if not rows:
-            return 0.0, []
-
-        header = [str(value).strip() if value is not None else "" for value in rows[0]]
-        total = 0.0
-        accounts = []
-        for row in rows[1:]:
-            ownership = str(live_value(row, header, "自营/合作", "")).strip()
-            if ownership != "自营":
-                continue
-            account = str(live_value(row, header, "账号名称", "") or "").strip()
-            amount = num(live_value(row, header, "成交金额"))
-            total += amount
-            if account:
-                accounts.append({"name": account, "gmv": rounded(amount)})
-        return rounded(total), accounts
-    finally:
-        wb.close()
-
-
 def eval_formula(value, cells, visiting=None):
     if not isinstance(value, str):
         return num(value)
@@ -504,9 +472,6 @@ def build_writes(day, offline_example=False, qianchuan_cost=None, shop="drink"):
     # UUAtO2 — 仪表盘数据源
     uu_row = find_date_row(REPORT, "UUAtO2", serial, next_row_on_missing=True)
     uu_row = uu_row or DRINK_SHOP_FALLBACK_ROW
-    # 汇总区直播GMV：罗盘账号构成中，自营类型下各直播间成交金额之和。
-    self_live_gmv, self_live_accounts = load_self_live_gmv(day, shop)
-    live_summary_gmv = self_live_gmv if self_live_accounts else rounded(carriers["直播"])
     add((REPORT, f"UUAtO2!A{uu_row}", [[serial]]))
     # Single-account live exports may omit the organic oat account; P/Q remain authoritative.
     if not oat_flake["gmv"] and not oat_rice["gmv"]:
@@ -520,6 +485,10 @@ def build_writes(day, offline_example=False, qianchuan_cost=None, shop="drink"):
     if qianchuan_cost is not None:
         net_spend = qianchuan_cost - (read_organic_spend(uu_row) or oat_flake["cost"]) - yinshan_live["cost"]
         add((REPORT, f"UUAtO2!C{uu_row}", [[rounded(net_spend, 2)]]))
+    # 直播GMV只保留主店直播载体，剔除另行展示的有机燕麦片和阴山优麦直播间。
+    live_summary_gmv = rounded(
+        carriers["直播"] - oat_flake["gmv"] - oat_rice["gmv"] - yinshan_live["gmv"], 2
+    )
     add((REPORT, f"UUAtO2!D{uu_row}", [[live_summary_gmv]]))
     add((REPORT, f"UUAtO2!E{uu_row}", [[rounded(carriers["短视频"])]]))
     add((REPORT, f"UUAtO2!F{uu_row}", [[rounded(carriers["商品卡"])]]))
