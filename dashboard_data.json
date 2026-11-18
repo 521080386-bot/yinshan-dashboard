@@ -10630,22 +10630,42 @@
           "hours": 4.5
         }
       ]
+    },
+    {
+      "serial": 46344,
+      "date": "2026-11-18",
+      "anchors": [
+        {
+          "name": "杨琼",
+          "gmv": 22511.0,
+          "spend": 8521.0,
+          "roi": 2.64,
+          "hours": 4.5
+        },
+        {
+          "name": "范范",
+          "gmv": 25304.0,
+          "spend": 9969.0,
+          "roi": 2.54,
+          "hours": 4.5
+        }
+      ]
     }
   ],
   "postalMonthly": {
-    "gmv": 89.9,
+    "gmv": 0.0,
     "spend": 0.0,
     "roi": 0
   },
   "videoMonthly": {
-    "gmv": 4970.3,
-    "spend": 1013.34,
-    "roi": 4.9
+    "gmv": 0.0,
+    "spend": 0.0,
+    "roi": 0
   },
   "organicMonthly": {
-    "gmv": 52580.9,
-    "spend": 22092.99,
-    "roi": 2.38
+    "gmv": 0.0,
+    "spend": 0.0,
+    "roi": 0
   },
   "targetGmv": 3500000,
   "targetRoi": 3,
@@ -13589,7 +13609,7 @@
       "cost": 27114.02
     }
   ],
-  "fetchedAt": "2026-11-18 09:20:20",
+  "fetchedAt": "2026-11-18 08:41:33",
   "food": {
     "knownDays": [
       {
